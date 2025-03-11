@@ -1,0 +1,125 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+@import "tailwindcss";
+
+@theme {
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-fade-out: fade-out 0.3s ease-out;
+  --animate-slide-in: slide-in 0.3s ease-out;
+  --animate-slide-out: slide-out 0.3s ease-out;
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  @keyframes slide-in {
+    100% {
+      transform: translateX(0);
+    }
+    0% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes slide-out {
+    100% {
+      transform: translateX(100%);
+    } 
+    0% {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fade-out {
+    100% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes fade-in {
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+}
+/* @keyframes slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+} */
+@layer components {
+
+  .toast-container {
+    @apply fixed z-50 p-4 flex flex-col gap-2;
+  }
+
+  .toast-container[data-position="top-right"] {
+    @apply top-0 right-0;
+  }
+
+  .toast-container[data-position="top-left"] {
+    @apply top-0 left-0;
+  }
+
+  .toast-container[data-position="bottom-right"] {
+    @apply bottom-0 right-0;
+  }
+
+  .toast-container[data-position="bottom-left"] {
+    @apply bottom-0 left-0;
+  }
+
+  .toast {
+    @apply flex items-center gap-2 p-4 rounded-lg shadow-lg min-w-[300px] max-w-[400px];
+  }
+
+  .toast-success {
+    @apply bg-green-500 text-white;
+  }
+
+  .toast-error {
+    @apply bg-red-500 text-white;
+  }
+
+  .toast-warning {
+    @apply bg-yellow-500 text-white;
+  }
+
+  .toast-info {
+    @apply bg-blue-500 text-white;
+  }
+
+  .toast-close {
+    @apply ml-auto cursor-pointer hover:opacity-75 transition-opacity;
+  }
+}

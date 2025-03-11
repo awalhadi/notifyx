@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Toast Notification Demo</title>
+
+    <!-- Include the toast CSS -->
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="../dist/notifyx.min.css" />
+
+    <!-- Add some basic styling for the demo -->
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+
+      .demo-section {
+        margin: 2rem 0;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        background-color: #f3f4f6;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-weight: 500;
+        transition: opacity 0.2s;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      .btn-success {
+        background-color: #10b981;
+        color: white;
+      }
+
+      .btn-error {
+        background-color: #ef4444;
+        color: white;
+      }
+
+      .btn-warning {
+        background-color: #f59e0b;
+        color: white;
+      }
+
+      .btn-info {
+        background-color: #3b82f6;
+        color: white;
+      }
+
+      .position-select {
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Toast Notification Demo</h1>
+
+    <div class="demo-section">
+      <h2>Basic Toast Examples</h2>
+      <div class="button-group">
+        <button class="btn-success" onclick="showSuccessToast()">
+          Success Toast
+        </button>
+        <button class="btn-error" onclick="showErrorToast()">
+          Error Toast
+        </button>
+        <button class="btn-warning" onclick="showWarningToast()">
+          Warning Toast
+        </button>
+        <button class="btn-info" onclick="showInfoToast()">Info Toast</button>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Custom Position</h2>
+      <select id="positionSelect" class="position-select">
+        <option value="top-right">Top Right</option>
+        <option value="top-left">Top Left</option>
+        <option value="bottom-right">Bottom Right</option>
+        <option value="bottom-left">Bottom Left</option>
+      </select>
+      <button class="btn-info" onclick="showCustomPositionToast()">
+        Show Toast
+      </button>
+    </div>
+
+    <div class="demo-section">
+      <h2>Custom Duration</h2>
+      <button class="btn-info" onclick="showLongDurationToast()">
+        Show 5s Toast
+      </button>
+      <button class="btn-warning" onclick="showPermanentToast()">
+        Show Permanent Toast
+      </button>
+    </div>
+
+    <!-- Include the toast package -->
+    <script type="module" src="../dist/notifyx.min.js"></script>
+
+    <script>
+      // Basic toast examples
+      function showSuccessToast() {
+        Toast.success('Operation completed successfully!');
+      }
+
+      function showErrorToast() {
+        Toast.error('An error occurred while processing your request.');
+      }
+
+      function showWarningToast() {
+        Toast.warning('Please review your information before proceeding.');
+      }
+
+      function showInfoToast() {
+        Toast.info('Did you know you can customize these notifications?');
+      }
+
+      // Custom position toast
+      function showCustomPositionToast() {
+        const position = document.getElementById('positionSelect').value;
+        Toast.show({
+          message: `This toast appears in the ${position} position`,
+          type: 'info',
+          position: position,
+        });
+      }
+
+      // Custom duration toasts
+      function showLongDurationToast() {
+        Toast.info('This toast will stay for 5 seconds', {
+          duration: 5000,
+        });
+      }
+
+      function showPermanentToast() {
+        Toast.warning('This toast will stay until manually closed', {
+          duration: 0,
+          dismissible: true,
+        });
+      }
+
+      // Show welcome toast when page loads
+      document.addEventListener('DOMContentLoaded', () => {
+        Toast.info('👋 Welcome to the Toast Notification Demo!', {
+          duration: 4000,
+        });
+      });
+    </script>
+  </body>
+</html>
