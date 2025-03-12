@@ -12,7 +12,7 @@ const ANIMATION_CLASSES = {
   enter: 'animate-slide-in',
   exit: 'animate-slide-out'
 };
-export class Toast {
+export class NotifyX {
   private static createToastElement(options: ToastOptions): HTMLElement {
     const toast = document.createElement('div');
     toast.className = `toast toast-${options.type} ${ANIMATION_CLASSES.enter}`;
@@ -98,12 +98,8 @@ export class Toast {
   }
 }
 
-// jQuery and other usages can be added here
 // check window object to avoid conflicts
-// if(typeof window !== 'undefined') {
-//   (window as any).Toast = Toast;
-// }
-if (typeof window !== 'undefined' && !(window as any).Toast) {
-  (window as any).Toast = Toast;
+if (typeof window !== 'undefined' && !(window as any).NotifyX) {
+  (window as any).NotifyX = NotifyX;
 }
-export default Toast;
+export default NotifyX;

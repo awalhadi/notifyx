@@ -114,30 +114,30 @@
     </div>
 
     <!-- Include the toast package -->
-    <script type="module" src="../dist/notifyx.min.js"></script>
+    <script type="module" src="../dist/notifyx.es.js"></script>
 
     <script>
       // Basic toast examples
       function showSuccessToast() {
-        Toast.success('Operation completed successfully!');
+        NotifyX.success('Operation completed successfully!');
       }
 
       function showErrorToast() {
-        Toast.error('An error occurred while processing your request.');
+        NotifyX.error('An error occurred while processing your request.');
       }
 
       function showWarningToast() {
-        Toast.warning('Please review your information before proceeding.');
+        NotifyX.warning('Please review your information before proceeding.');
       }
 
       function showInfoToast() {
-        Toast.info('Did you know you can customize these notifications?');
+        NotifyX.info('Did you know you can customize these notifications?');
       }
 
       // Custom position toast
       function showCustomPositionToast() {
         const position = document.getElementById('positionSelect').value;
-        Toast.show({
+        NotifyX.show({
           message: `This toast appears in the ${position} position`,
           type: 'info',
           position: position,
@@ -146,13 +146,13 @@
 
       // Custom duration toasts
       function showLongDurationToast() {
-        Toast.info('This toast will stay for 5 seconds', {
+        NotifyX.info('This toast will stay for 5 seconds', {
           duration: 5000,
         });
       }
 
       function showPermanentToast() {
-        Toast.warning('This toast will stay until manually closed', {
+        NotifyX.warning('This toast will stay until manually closed', {
           duration: 0,
           dismissible: true,
         });
@@ -160,7 +160,7 @@
 
       // Show welcome toast when page loads
       document.addEventListener('DOMContentLoaded', () => {
-        Toast.info('👋 Welcome to the Toast Notification Demo!', {
+        NotifyX.info('👋 Welcome to the Toast Notification Demo!', {
           duration: 4000,
         });
       });
