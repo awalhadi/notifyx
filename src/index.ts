@@ -1,5 +1,6 @@
 import { ToastOptions, ToastType } from './types';
 import { getContainer } from './utils/dom';
+import { ANIMATION_CLASSES } from './constants';
 
 const defaultOptions: Partial<ToastOptions> = {
   type: 'info',
@@ -8,17 +9,14 @@ const defaultOptions: Partial<ToastOptions> = {
   dismissible: true
 };
 
-const ANIMATION_CLASSES = {
-  enter: 'animate-slide-in',
-  exit: 'animate-slide-out'
-};
 export class NotifyX {
-  private static createToastElement(options: ToastOptions): HTMLElement {
+  private static generateToastElement(options: ToastOptions): HTMLElement {
     const toast = document.createElement('div');
-    toast.className = `toast toast-${options.type} ${ANIMATION_CLASSES.enter}`;
-    toast.setAttribute('role', 'alert')
+    toast.className = `notifyx notifyx-${options.type} ${ANIMATION_CLASSES.enter} rounded-lg border shadow-md`;
+    toast.setAttribute('role', 'alert') 
     
     const message = document.createElement('span');
+    message.className = "notifyx-msg";
     message.textContent = options.message;
     toast.appendChild(message);
 
@@ -37,7 +35,7 @@ export class NotifyX {
   public static show(options: ToastOptions): void {
     const mergedOptions = { ...defaultOptions, ...options };
     const container = getContainer(mergedOptions.position!);
-    const toastElement = this.createToastElement(mergedOptions);
+    const toastElement = this.generateToastElement(mergedOptions);
     
     container.appendChild(toastElement);
 
@@ -72,7 +70,7 @@ export class NotifyX {
     }
 
     if (mergedOptions.dismissible) {
-      const closeButton = toastElement.querySelector('.toast-close') as HTMLButtonElement;
+      const closeButton = toastElement.querySelector('.notifyx-close') as HTMLButtonElement;
       closeButton.onclick = () => {
         if (timeoutId) clearTimeout(timeoutId);
         toastElement.remove();
