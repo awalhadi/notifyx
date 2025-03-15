@@ -79,9 +79,8 @@ Methods
 | ------------- |:-------------:| -----:| -----:|
 | message      | string | (Required) | The text to display in the toast.|
 | type      | `"success", "error", "warning", "info"` |  `info` | The type of toast (e.g., success, error, warning, info).|
-| duration | number | 3000  |    Duration in milliseconds before the toast auto-dismisses.
- |
-|position | "top-right" | "top-left" | "bottom-right" | "bottom-left" | "top-right" | Position of the toast on the screen.|
+| duration | number | 3000  |    Duration in milliseconds before the toast auto-dismisses.|
+|position | `"top-right", "top-left", "bottom-right", "bottom-left"` | `top-right`  |  Position of the toast on the screen.
 | dismissible | boolean | true | Whether the toast can be dismissed manually by the user.
 |
 
