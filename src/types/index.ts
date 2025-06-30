@@ -1,10 +1,12 @@
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
+import { Position } from '../constants/index';
 
+export type ToastType = 'success' | 'error' | 'warning' | 'info';
 export interface ToastOptions {
   message: string;
   type?: ToastType;
   duration?: number;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  position?: Position;
   dismissible?: boolean;
   onClose?: () => void;
+  maxToasts?: number;
 }

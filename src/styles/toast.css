@@ -1,4 +1,3 @@
-
 @import "tailwindcss";
 
 @theme {
@@ -7,78 +6,54 @@
   --animate-slide-in: slide-in 0.3s ease-out;
   --animate-slide-out: slide-out 0.3s ease-out;
 
-  @keyframes slideInRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-  
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
   @keyframes slide-in {
-    100% {
-      transform: translateX(0);
-    }
     0% {
       transform: translateX(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
     }
   }
 
   @keyframes slide-out {
-    100% {
-      transform: translateX(100%);
-    } 
     0% {
       transform: translateX(0);
-    }
-  }
-
-  @keyframes fade-out {
-    100% {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    0% {
       opacity: 1;
-      transform: scale(1);
+    }
+    100% {
+      transform: translateX(100%);
+      opacity: 0;
     }
   }
 
   @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
     100% {
       opacity: 1;
       transform: scale(1);
     }
+  }
+
+  @keyframes fade-out {
     0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
       opacity: 0;
       transform: scale(0.95);
     }
   }
 }
-/* @keyframes slide-in {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
-}
 
-@keyframes slide-out {
-  from { transform: translateX(0); }
-  to { transform: translateX(100%); }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-} */
 @layer components {
-
   .notifyx-container {
-    @apply fixed z-50 p-4 flex flex-col gap-2;
+    @apply fixed z-50 p-4 flex flex-col gap-2 pointer-events-none;
   }
 
   .notifyx-container[data-position="top-right"] {
@@ -98,33 +73,58 @@
   }
 
   .notifyx {
-    @apply flex items-center gap-2 p-2 rounded-lg shadow-lg min-w-[300px] max-w-[400px];
+    @apply flex items-center gap-3 p-4 rounded-lg shadow-lg border pointer-events-auto backdrop-blur-sm transition-all duration-300 ease-out;
+    min-width: 320px;
+    max-width: 420px;
   }
 
   .notifyx-success {
-    @apply bg-green-50 border-green-200 text-green-800;
+    @apply bg-green-50/95 border-green-200 text-green-800;
+    @apply dark:bg-green-900/20 dark:border-green-700/50 dark:text-green-200;
   }
 
   .notifyx-error {
-    @apply bg-red-50 border-red-200 text-red-800;
+    @apply bg-red-50/95 border-red-200 text-red-800;
+    @apply dark:bg-red-900/20 dark:border-red-700/50 dark:text-red-200;
   }
 
   .notifyx-warning {
-    @apply bg-amber-50 border-amber-200 text-amber-800;
+    @apply bg-amber-50/95 border-amber-200 text-amber-800;
+    @apply dark:bg-amber-900/20 dark:border-amber-700/50 dark:text-amber-200;
   }
 
   .notifyx-info {
-    @apply bg-blue-50 border-blue-200 text-blue-800;
+    @apply bg-blue-50/95 border-blue-200 text-blue-800;
+    @apply dark:bg-blue-900/20 dark:border-blue-700/50 dark:text-blue-200;
   }
+
   .notifyx-default {
-    @apply bg-sky-50 border-sky-200 text-sky-950;
+    @apply bg-sky-50/95 border-sky-200 text-sky-950;
+    @apply dark:bg-sky-900/20 dark:border-sky-700/50 dark:text-sky-200;
   }
 
   .notifyx-close {
-    @apply ml-auto cursor-pointer hover:opacity-75 transition-opacity;
+    @apply ml-auto cursor-pointer hover:opacity-75 transition-opacity duration-200 w-5 h-5 flex items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/10;
   }
 
   .notifyx-msg {
-    @apply text-sm font-medium
+    @apply text-sm font-medium flex-1;
+  }
+
+  /* Animation classes */
+  .notifyx-enter {
+    animation: var(--animate-fade-in);
+  }
+
+  .notifyx-exit {
+    animation: var(--animate-fade-out);
+  }
+
+  .notifyx-slide-enter {
+    animation: var(--animate-slide-in);
+  }
+
+  .notifyx-slide-exit {
+    animation: var(--animate-slide-out);
   }
 }

@@ -3,167 +3,174 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Toast Notification Demo</title>
-
-    <!-- Include the toast CSS -->
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <title>NotifyX Demo</title>
     <link rel="stylesheet" href="../dist/notifyx.min.css" />
-
-    <!-- Add some basic styling for the demo -->
     <style>
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-          Oxygen, Ubuntu, Cantarell, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+      .container {
         max-width: 800px;
-        margin: 2rem auto;
-        padding: 0 1rem;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
       }
-
-      .demo-section {
-        margin: 2rem 0;
-        padding: 2rem;
-        border-radius: 0.5rem;
-        background-color: #f3f4f6;
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
       }
-
-      .button-group {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
+      .button-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
       }
-
       button {
-        padding: 0.5rem 1rem;
+        padding: 12px 24px;
         border: none;
-        border-radius: 0.25rem;
-        cursor: pointer;
+        border-radius: 8px;
+        font-size: 16px;
         font-weight: 500;
-        transition: opacity 0.2s;
-      }
-
-      button:hover {
-        opacity: 0.9;
-      }
-
-      .btn-success {
-        background-color: #10b981;
+        cursor: pointer;
+        transition: all 0.2s ease;
         color: white;
       }
-
-      .btn-error {
-        background-color: #ef4444;
-        color: white;
+      .btn-success { background: #10b981; }
+      .btn-success:hover { background: #059669; }
+      .btn-error { background: #ef4444; }
+      .btn-error:hover { background: #dc2626; }
+      .btn-warning { background: #f59e0b; }
+      .btn-warning:hover { background: #d97706; }
+      .btn-info { background: #3b82f6; }
+      .btn-info:hover { background: #2563eb; }
+      .btn-clear { background: #6b7280; }
+      .btn-clear:hover { background: #4b5563; }
+      .position-controls {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
       }
-
-      .btn-warning {
-        background-color: #f59e0b;
-        color: white;
+      .position-controls button {
+        background: #8b5cf6;
+        font-size: 14px;
       }
-
-      .btn-info {
-        background-color: #3b82f6;
-        color: white;
+      .position-controls button:hover {
+        background: #7c3aed;
       }
-
-      .position-select {
-        padding: 0.5rem;
-        margin-bottom: 1rem;
+      .position-controls button.active {
+        background: #5b21b6;
+      }
+      .features {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 30px;
+      }
+      .features h3 {
+        margin-top: 0;
+        color: #374151;
+      }
+      .features ul {
+        color: #6b7280;
+        line-height: 1.6;
       }
     </style>
   </head>
   <body>
-    <h1>Toast Notification Demo</h1>
+    <div class="container">
+      <h1>🚀 NotifyX Demo</h1>
+      
+      <div class="position-controls">
+        <button onclick="setPosition('top-right')" class="active">Top Right</button>
+        <button onclick="setPosition('top-left')">Top Left</button>
+        <button onclick="setPosition('bottom-right')">Bottom Right</button>
+        <button onclick="setPosition('bottom-left')">Bottom Left</button>
+      </div>
 
-    <div class="demo-section">
-      <h2>Basic Toast Examples</h2>
-      <div class="button-group">
-        <button class="btn-success" onclick="showSuccessToast()">
-          Success Toast
-        </button>
-        <button class="btn-error" onclick="showErrorToast()">
-          Error Toast
-        </button>
-        <button class="btn-warning" onclick="showWarningToast()">
-          Warning Toast
-        </button>
-        <button class="btn-info" onclick="showInfoToast()">Info Toast</button>
+      <div class="button-grid">
+        <button class="btn-success" onclick="showSuccess()">Success Toast</button>
+        <button class="btn-error" onclick="showError()">Error Toast</button>
+        <button class="btn-warning" onclick="showWarning()">Warning Toast</button>
+        <button class="btn-info" onclick="showInfo()">Info Toast</button>
+        <button class="btn-clear" onclick="clearAll()">Clear All</button>
+      </div>
+
+      <div class="features">
+        <h3>✨ Features</h3>
+        <ul>
+          <li>🎨 Built-in Tailwind CSS styles (no Tailwind required)</li>
+          <li>🌙 Automatic dark mode support</li>
+          <li>♿ Accessibility features (ARIA attributes)</li>
+          <li>🎭 Smooth CSS animations</li>
+          <li>📱 Responsive design</li>
+          <li>⚡ Lightweight and fast</li>
+          <li>🔧 TypeScript support</li>
+          <li>🎯 Framework agnostic</li>
+        </ul>
       </div>
     </div>
 
-    <div class="demo-section">
-      <h2>Custom Position</h2>
-      <select id="positionSelect" class="position-select">
-        <option value="top-right">Top Right</option>
-        <option value="top-left">Top Left</option>
-        <option value="bottom-right">Bottom Right</option>
-        <option value="bottom-left">Bottom Left</option>
-      </select>
-      <button class="btn-info" onclick="showCustomPositionToast()">
-        Show Toast
-      </button>
-    </div>
-
-    <div class="demo-section">
-      <h2>Custom Duration</h2>
-      <button class="btn-info" onclick="showLongDurationToast()">
-        Show 5s Toast
-      </button>
-      <button class="btn-warning" onclick="showPermanentToast()">
-        Show Permanent Toast
-      </button>
-    </div>
-
-    <!-- Include the toast package -->
-    <script type="module" src="../dist/notifyx.es.js"></script>
-
-    <script>
-      // Basic toast examples
-      function showSuccessToast() {
-        NotifyX.success('Operation completed successfully!');
-      }
-
-      function showErrorToast() {
-        NotifyX.error('An error occurred while processing your request.');
-      }
-
-      function showWarningToast() {
-        NotifyX.warning('Please review your information before proceeding.');
-      }
-
-      function showInfoToast() {
-        NotifyX.info('Did you know you can customize these notifications?');
-      }
-
-      // Custom position toast
-      function showCustomPositionToast() {
-        const position = document.getElementById('positionSelect').value;
-        NotifyX.show({
-          message: `This toast appears in the ${position} position`,
-          type: 'info',
-          position: position,
+    <script type="module">
+      import NotifyX from '../dist/notifyx.es.js';
+      
+      let currentPosition = 'top-right';
+      
+      window.setPosition = function(position) {
+        currentPosition = position;
+        // Update active button
+        document.querySelectorAll('.position-controls button').forEach(btn => {
+          btn.classList.remove('active');
         });
-      }
-
-      // Custom duration toasts
-      function showLongDurationToast() {
-        NotifyX.info('This toast will stay for 5 seconds', {
-          duration: 5000,
+        event.target.classList.add('active');
+      };
+      
+      window.showSuccess = function() {
+        NotifyX.success('Operation completed successfully! 🎉', {
+          position: currentPosition,
+          duration: 4000
         });
-      }
-
-      function showPermanentToast() {
-        NotifyX.warning('This toast will stay until manually closed', {
-          duration: 0,
-          dismissible: true,
+      };
+      
+      window.showError = function() {
+        NotifyX.error('Something went wrong! Please try again.', {
+          position: currentPosition,
+          duration: 5000
         });
-      }
-
-      // Show welcome toast when page loads
-      document.addEventListener('DOMContentLoaded', () => {
-        NotifyX.info('👋 Welcome to the Toast Notification Demo!', {
-          duration: 4000,
+      };
+      
+      window.showWarning = function() {
+        NotifyX.warning('Please check your input before proceeding.', {
+          position: currentPosition,
+          duration: 4000
         });
-      });
+      };
+      
+      window.showInfo = function() {
+        NotifyX.info('Here is some helpful information for you.', {
+          position: currentPosition,
+          duration: 3000
+        });
+      };
+      
+      window.clearAll = function() {
+        NotifyX.clear();
+      };
+      
+      // Show welcome message
+      setTimeout(() => {
+        NotifyX.info('Welcome to NotifyX! Click the buttons above to see different toast types.', {
+          position: 'top-right',
+          duration: 5000
+        });
+      }, 1000);
     </script>
   </body>
 </html>

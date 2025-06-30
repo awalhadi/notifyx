@@ -1,11 +1,14 @@
-export const createToastContainer = (position: string): HTMLElement => {
+import { Position } from '../constants/index';
+
+export const createToastContainer = (position: Position): HTMLElement => {
   const container = document.createElement('div');
   container.className = 'notifyx-container';
   container.setAttribute('data-position', position);
+  container.setAttribute('aria-label', `Notifications ${position.replace('-', ' ')}`);
   return container;
 };
 
-export const getContainer = (position: string): HTMLElement => {
+export const getContainer = (position: Position): HTMLElement => {
   const existingContainer = document.querySelector(
     `.notifyx-container[data-position="${position}"]`
   ) as HTMLElement;
