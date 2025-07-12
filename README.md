@@ -1,31 +1,23 @@
 # 🚀 NotifyX
 
-> **A modern, lightweight toast notification library with beautiful animations and zero dependencies**
+> **A modern, lightweight toast notification library with beautiful Tailwind CSS styles and zero runtime dependencies**
 
 [![npm](https://img.shields.io/npm/v/notifyx)](https://www.npmjs.com/package/notifyx)
-[![bundle size](https://img.shields.io/bundlephobia/min/notifyx)](https://bundlephobia.com/package/notifyx)
+<!-- [![bundle size](https://img.shields.io/bundlephobia/min/notifyx)](https://bundlephobia.com/package/notifyx) -->
 [![license](https://img.shields.io/npm/l/notifyx)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 ## ✨ Features
 
 - 🎯 **Framework Agnostic** - Works with React, Vue, Angular, Svelte, or vanilla JS
-- 🎨 **Beautiful Design** - Modern UI with smooth animations and dark mode support
-- ⚡ **Lightweight** - Only ~3KB minified + gzipped
+- 🎨 **Beautiful Design** - Modern UI with Tailwind CSS styles and smooth animations
+- 🌙 **Dark Mode Ready** - Automatic dark mode detection and styling
+- ⚡ **Lightweight** - Minimal bundle size with no runtime dependencies
 - 🔧 **TypeScript Ready** - Full type definitions included
-- ♿ **Accessible** - ARIA attributes and keyboard navigation
-- 🌙 **Dark Mode** - Automatic dark mode detection
+- ♿ **Accessible** - ARIA attributes and keyboard navigation support
 - 📱 **Responsive** - Perfect on all screen sizes
 - 🎭 **Smooth Animations** - CSS-based animations with fallbacks
 - 🎛️ **Highly Customizable** - Easy to style and configure
-
-## 🎮 Live Demo
-
-Try it out! Click the buttons below to see NotifyX in action:
-
-<div align="center">
-  <img src="https://img.shields.io/badge/Demo-Online-green?style=for-the-badge&logo=github" alt="Demo Online">
-</div>
 
 ## 📦 Installation
 
@@ -85,6 +77,66 @@ NotifyX.show({
 NotifyX.clear();
 ```
 
+## 📚 API Reference
+
+### Methods
+
+| Method | Description | Parameters |
+|--------|-------------|------------|
+| `NotifyX.show(options)` | Display custom notification | `ToastOptions` |
+| `NotifyX.success(message, options?)` | Success notification | `string, Partial<ToastOptions>?` |
+| `NotifyX.error(message, options?)` | Error notification | `string, Partial<ToastOptions>?` |
+| `NotifyX.warning(message, options?)` | Warning notification | `string, Partial<ToastOptions>?` |
+| `NotifyX.info(message, options?)` | Info notification | `string, Partial<ToastOptions>?` |
+| `NotifyX.clear()` | Clear all notifications | None |
+
+### TypeScript Interface
+
+```typescript
+interface ToastOptions {
+  message: string;           // Required: Message to display
+  type?: ToastType;         // Optional: 'success' | 'error' | 'warning' | 'info'
+  duration?: number;        // Optional: Duration in ms (0 = persistent)
+  position?: Position;      // Optional: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
+  dismissible?: boolean;    // Optional: Whether toast can be dismissed
+  onClose?: () => void;     // Optional: Callback when toast closes
+  maxToasts?: number;       // Optional: Maximum number of toasts (default: 5)
+}
+
+type ToastType = 'success' | 'error' | 'warning' | 'info';
+type Position = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+```
+
+### Default Options
+
+```typescript
+const DEFAULT_OPTIONS = {
+  type: 'info',
+  duration: 3000,
+  position: 'top-right',
+  dismissible: true,
+  maxToasts: 5
+};
+```
+
+### Available Constants
+
+```typescript
+import { POSITIONS, ANIMATION_CLASSES, DEFAULT_OPTIONS } from 'notifyx';
+
+// Position constants
+POSITIONS.TOP_RIGHT    // 'top-right'
+POSITIONS.TOP_LEFT     // 'top-left'
+POSITIONS.BOTTOM_RIGHT // 'bottom-right'
+POSITIONS.BOTTOM_LEFT  // 'bottom-left'
+
+// Animation classes
+ANIMATION_CLASSES.enter      // 'notifyx-enter'
+ANIMATION_CLASSES.exit       // 'notifyx-exit'
+ANIMATION_CLASSES.slideEnter // 'notifyx-slide-enter'
+ANIMATION_CLASSES.slideExit  // 'notifyx-slide-exit'
+```
+
 ## 🎨 Examples & Use Cases
 
 ### Basic Notifications
@@ -114,7 +166,7 @@ NotifyX.info('Your data is being processed');
 ### Form Validation
 
 ```javascript
-// Form submission
+// Form submission with validation
 function handleSubmit() {
   if (!email) {
     NotifyX.error('Please enter your email address');
@@ -134,7 +186,7 @@ function handleSubmit() {
 ### API Responses
 
 ```javascript
-// API success
+// API success/error handling
 async function fetchData() {
   try {
     const response = await api.get('/users');
@@ -165,59 +217,39 @@ function deleteItem(id) {
 }
 ```
 
-## 📚 API Reference
-
-### Methods
-
-| Method | Description | Example |
-|--------|-------------|---------|
-| `NotifyX.show(options)` | Display custom notification | `NotifyX.show({ message: 'Hello', type: 'info' })` |
-| `NotifyX.success(message, options?)` | Success notification | `NotifyX.success('Success!')` |
-| `NotifyX.error(message, options?)` | Error notification | `NotifyX.error('Error!')` |
-| `NotifyX.warning(message, options?)` | Warning notification | `NotifyX.warning('Warning!')` |
-| `NotifyX.info(message, options?)` | Info notification | `NotifyX.info('Info!')` |
-| `NotifyX.clear()` | Clear all notifications | `NotifyX.clear()` |
-
-### Options
+### TypeScript Examples
 
 ```typescript
-interface ToastOptions {
-  message: string;           // Required: Message to display
-  type?: ToastType;         // Optional: 'success' | 'error' | 'warning' | 'info'
-  duration?: number;        // Optional: Duration in ms (0 = persistent)
-  position?: Position;      // Optional: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
-  dismissible?: boolean;    // Optional: Whether toast can be dismissed
-  onClose?: () => void;     // Optional: Callback when toast closes
-  maxToasts?: number;       // Optional: Maximum number of toasts (default: 5)
-}
-```
+import NotifyX, { ToastOptions, POSITIONS } from 'notifyx';
 
-### Positions
-
-```javascript
-// Available positions
-NotifyX.info('Top Right', { position: 'top-right' });     // Default
-NotifyX.info('Top Left', { position: 'top-left' });
-NotifyX.info('Bottom Right', { position: 'bottom-right' });
-NotifyX.info('Bottom Left', { position: 'bottom-left' });
-```
-
-### Constants
-
-```javascript
-import { POSITIONS, ANIMATION_CLASSES, DEFAULT_OPTIONS } from 'notifyx';
-
-// Use constants for better code
-NotifyX.show({
-  message: 'Hello',
+// Typed options
+const options: Partial<ToastOptions> = {
   position: POSITIONS.BOTTOM_RIGHT,
-  duration: DEFAULT_OPTIONS.duration
-});
+  duration: 5000,
+  dismissible: true,
+  onClose: () => console.log('Toast closed')
+};
+
+NotifyX.success('Operation completed!', options);
+
+// Custom notification with full typing
+const customToast: ToastOptions = {
+  message: 'Custom notification',
+  type: 'info',
+  position: 'top-left',
+  duration: 0, // Persistent
+  dismissible: false,
+  onClose: () => console.log('Custom toast closed')
+};
+
+NotifyX.show(customToast);
 ```
 
 ## 🎨 Customization
 
 ### CSS Customization
+
+The library uses Tailwind CSS classes, so you can easily customize the appearance:
 
 ```css
 /* Override default styles */
@@ -235,13 +267,7 @@ NotifyX.show({
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
 }
-```
 
-### Dark Mode Support
-
-NotifyX automatically detects and adapts to dark mode:
-
-```css
 /* Custom dark mode styles */
 @media (prefers-color-scheme: dark) {
   .notifyx {
@@ -251,134 +277,107 @@ NotifyX automatically detects and adapts to dark mode:
 }
 ```
 
-### Animation Customization
-
-```css
-/* Custom animations */
-@keyframes slideInFromTop {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.notifyx-enter {
-  animation: slideInFromTop 0.5s ease-out;
-}
-```
-
-## 🔧 Advanced Usage
-
-### Persistent Notifications
+### Position Examples
 
 ```javascript
-// Notification that stays until manually dismissed
-NotifyX.show({
-  message: 'Please complete your profile setup',
-  type: 'warning',
-  duration: 0, // Persistent
-  dismissible: true
-});
+// Available positions
+NotifyX.info('Top Right', { position: 'top-right' });     // Default
+NotifyX.info('Top Left', { position: 'top-left' });
+NotifyX.info('Bottom Right', { position: 'bottom-right' });
+NotifyX.info('Bottom Left', { position: 'bottom-left' });
+
+// Using constants
+import { POSITIONS } from 'notifyx';
+NotifyX.success('Success!', { position: POSITIONS.BOTTOM_RIGHT });
 ```
 
-### Custom Close Callbacks
+### Duration Control
 
 ```javascript
-NotifyX.show({
-  message: 'Processing your request...',
-  type: 'info',
-  duration: 3000,
-  onClose: () => {
-    console.log('Processing notification closed');
-    // Perform cleanup or additional actions
-  }
-});
+// Auto-dismiss after 5 seconds
+NotifyX.info('This will disappear in 5 seconds', { duration: 5000 });
+
+// Persistent notification (no auto-dismiss)
+NotifyX.warning('Important: Please save your work', { duration: 0 });
+
+// Quick notification (1 second)
+NotifyX.success('Copied!', { duration: 1000 });
 ```
 
-### Multiple Notifications
+## 🔧 Framework Integration
 
-```javascript
-// Show multiple notifications
-NotifyX.success('Step 1 completed');
-setTimeout(() => NotifyX.info('Step 2 in progress...'), 1000);
-setTimeout(() => NotifyX.success('All steps completed!'), 2000);
-```
-
-### Integration with Frameworks
-
-#### React Example
+### React
 
 ```jsx
 import { useEffect } from 'react';
 import NotifyX from 'notifyx';
+import 'notifyx/dist/notifyx.min.css';
 
 function MyComponent() {
-  useEffect(() => {
-    NotifyX.success('Component mounted successfully!');
-  }, []);
-
-  const handleClick = () => {
-    NotifyX.info('Button clicked!');
+  const handleSuccess = () => {
+    NotifyX.success('Operation completed!');
   };
 
-  return <button onClick={handleClick}>Click me</button>;
+  return (
+    <button onClick={handleSuccess}>
+      Show Success Toast
+    </button>
+  );
 }
 ```
 
-#### Vue Example
+### Vue
 
 ```vue
 <template>
-  <button @click="showNotification">Show Toast</button>
+  <button @click="showToast">Show Toast</button>
 </template>
 
 <script setup>
 import NotifyX from 'notifyx';
+import 'notifyx/dist/notifyx.min.css';
 
-const showNotification = () => {
-  NotifyX.success('Vue component notification!');
+const showToast = () => {
+  NotifyX.success('Vue toast notification!');
 };
 </script>
 ```
 
-## 🌐 Browser Support
+### Angular
 
-- ✅ Chrome 88+
-- ✅ Firefox 85+
-- ✅ Safari 14+
-- ✅ Edge 88+
-- ✅ Mobile browsers
+```typescript
+import { Component } from '@angular/core';
+import NotifyX from 'notifyx';
+import 'notifyx/dist/notifyx.min.css';
 
-## 📦 Bundle Size
+@Component({
+  selector: 'app-my-component',
+  template: '<button (click)="showToast()">Show Toast</button>'
+})
+export class MyComponent {
+  showToast() {
+    NotifyX.success('Angular toast notification!');
+  }
+}
+```
 
-- **Minified**: ~3KB
-- **Minified + Gzipped**: ~1.2KB
-- **Zero dependencies**
+## 📱 Browser Support
+
+- Chrome 60+
+- Firefox 55+
+- Safari 12+
+- Edge 79+
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- Inspired by modern toast libraries
-- Built with ❤️ for the developer community
-
----
-
-<div align="center">
-  <p>Made with ❤️ by <a href="https://github.com/awalhadi">A Awal Hadi</a></p>
-  <p>
-    <a href="https://www.npmjs.com/package/notifyx">📦 npm</a> •
-    <a href="https://github.com/awalhadi/notifyx">🐙 GitHub</a> •
-    <a href="https://github.com/awalhadi/notifyx/issues">🐛 Issues</a>
-  </p>
-</div>
+- Built with [Tailwind CSS](https://tailwindcss.com/) for beautiful styling
+- Inspired by modern notification libraries
+- Thanks to all contributors and users!
