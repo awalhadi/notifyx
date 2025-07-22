@@ -3,7 +3,9 @@
 > **A modern, lightweight toast notification library with beautiful Tailwind CSS styles and zero runtime dependencies**
 
 [![npm](https://img.shields.io/npm/v/notifyx)](https://www.npmjs.com/package/notifyx)
+
 <!-- [![bundle size](https://img.shields.io/bundlephobia/min/notifyx)](https://bundlephobia.com/package/notifyx) -->
+
 [![license](https://img.shields.io/npm/l/notifyx)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
@@ -70,7 +72,7 @@ NotifyX.show({
   duration: 5000,
   position: 'bottom-right',
   dismissible: true,
-  onClose: () => console.log('Toast closed!')
+  onClose: () => console.log('Toast closed!'),
 });
 
 // Clear all notifications
@@ -81,24 +83,24 @@ NotifyX.clear();
 
 ### Methods
 
-| Method | Description | Parameters |
-|--------|-------------|------------|
-| `NotifyX.show(options)` | Display custom notification | `ToastOptions` |
-| `NotifyX.success(message, options?)` | Success notification | `string, Partial<ToastOptions>?` |
-| `NotifyX.error(message, options?)` | Error notification | `string, Partial<ToastOptions>?` |
-| `NotifyX.warning(message, options?)` | Warning notification | `string, Partial<ToastOptions>?` |
-| `NotifyX.info(message, options?)` | Info notification | `string, Partial<ToastOptions>?` |
-| `NotifyX.clear()` | Clear all notifications | None |
+| Method                               | Description                 | Parameters                       |
+| ------------------------------------ | --------------------------- | -------------------------------- |
+| `NotifyX.show(options)`              | Display custom notification | `ToastOptions`                   |
+| `NotifyX.success(message, options?)` | Success notification        | `string, Partial<ToastOptions>?` |
+| `NotifyX.error(message, options?)`   | Error notification          | `string, Partial<ToastOptions>?` |
+| `NotifyX.warning(message, options?)` | Warning notification        | `string, Partial<ToastOptions>?` |
+| `NotifyX.info(message, options?)`    | Info notification           | `string, Partial<ToastOptions>?` |
+| `NotifyX.clear()`                    | Clear all notifications     | None                             |
 
 ### Using TypeScript
 
 NotifyX is written in TypeScript and includes full type definitions. You can import the `ToastOptions` and `ToastType` types for a better development experience.
 
 ```typescript
-import NotifyX, { ToastOptions, ToastType } from 'notifyx';
+import NotifyX, { ToastOptionsType, ToastType } from 'notifyx';
 
-// Define options with the ToastOptions type
-const options: ToastOptions = {
+// Define options with the ToastOptionsType type
+const options: ToastOptionsType = {
   message: 'This is a typed notification!',
   type: 'success',
   position: 'bottom-right',
@@ -127,7 +129,7 @@ const DEFAULT_OPTIONS = {
   duration: 3000,
   position: 'top-right',
   dismissible: true,
-  maxToasts: 5
+  maxToasts: 5,
 };
 ```
 
@@ -137,16 +139,16 @@ const DEFAULT_OPTIONS = {
 import { POSITIONS, ANIMATION_CLASSES, DEFAULT_OPTIONS } from 'notifyx';
 
 // Position constants
-POSITIONS.TOP_RIGHT    // 'top-right'
-POSITIONS.TOP_LEFT     // 'top-left'
-POSITIONS.BOTTOM_RIGHT // 'bottom-right'
-POSITIONS.BOTTOM_LEFT  // 'bottom-left'
+POSITIONS.TOP_RIGHT; // 'top-right'
+POSITIONS.TOP_LEFT; // 'top-left'
+POSITIONS.BOTTOM_RIGHT; // 'bottom-right'
+POSITIONS.BOTTOM_LEFT; // 'bottom-left'
 
 // Animation classes
-ANIMATION_CLASSES.enter      // 'notifyx-enter'
-ANIMATION_CLASSES.exit       // 'notifyx-exit'
-ANIMATION_CLASSES.slideEnter // 'notifyx-slide-enter'
-ANIMATION_CLASSES.slideExit  // 'notifyx-slide-exit'
+ANIMATION_CLASSES.enter; // 'notifyx-enter'
+ANIMATION_CLASSES.exit; // 'notifyx-exit'
+ANIMATION_CLASSES.slideEnter; // 'notifyx-slide-enter'
+ANIMATION_CLASSES.slideExit; // 'notifyx-slide-exit'
 ```
 
 ## 🎨 Examples & Use Cases
@@ -184,12 +186,12 @@ function handleSubmit() {
     NotifyX.error('Please enter your email address');
     return;
   }
-  
+
   if (!password) {
     NotifyX.error('Password is required');
     return;
   }
-  
+
   // Submit form
   NotifyX.success('Form submitted successfully!');
 }
@@ -214,11 +216,14 @@ async function fetchData() {
 ```javascript
 // Copy to clipboard
 function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    NotifyX.success('Copied to clipboard!');
-  }).catch(() => {
-    NotifyX.error('Failed to copy');
-  });
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+      NotifyX.success('Copied to clipboard!');
+    })
+    .catch(() => {
+      NotifyX.error('Failed to copy');
+    });
 }
 
 // Delete confirmation
@@ -228,8 +233,6 @@ function deleteItem(id) {
   }
 }
 ```
-
-
 
 ## 🎨 Customization
 
@@ -267,7 +270,7 @@ The library uses Tailwind CSS classes, so you can easily customize the appearanc
 
 ```javascript
 // Available positions
-NotifyX.info('Top Right', { position: 'top-right' });     // Default
+NotifyX.info('Top Right', { position: 'top-right' }); // Default
 NotifyX.info('Top Left', { position: 'top-left' });
 NotifyX.info('Bottom Right', { position: 'bottom-right' });
 NotifyX.info('Bottom Left', { position: 'bottom-left' });
@@ -304,11 +307,7 @@ function MyComponent() {
     NotifyX.success('Operation completed!');
   };
 
-  return (
-    <button onClick={handleSuccess}>
-      Show Success Toast
-    </button>
-  );
+  return <button onClick={handleSuccess}>Show Success Toast</button>;
 }
 ```
 
@@ -338,7 +337,7 @@ import 'notifyx/dist/notifyx.min.css';
 
 @Component({
   selector: 'app-my-component',
-  template: '<button (click)="showToast()">Show Toast</button>'
+  template: '<button (click)="showToast()">Show Toast</button>',
 })
 export class MyComponent {
   showToast() {

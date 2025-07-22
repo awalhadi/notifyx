@@ -121,5 +121,5 @@ export { ANIMATION_CLASSES, DEFAULT_OPTIONS, POSITIONS } from './constants/index
 if (typeof window !== 'undefined' && !(window as any).NotifyX) {
   (window as any).NotifyX = NotifyX;
 }
-export type { ToastOptions, ToastType } from './types';
+export type { ToastOptions as ToastOptionsType, ToastType } from './types';
 export default NotifyX;
