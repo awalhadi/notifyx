@@ -1,6 +1,6 @@
 {
   "name": "notifyx",
-  "version": "2.2.31",
+  "version": "2.2.32",
   "author": "A Awal Hadi",
   "type": "module",
   "main": "dist/notifyx.min.js",
