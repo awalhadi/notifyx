@@ -118,7 +118,7 @@ out
 # Nuxt.js build / generate output
 
 .nuxt
-dist
+# dist
 
 # Gatsby files
 
@@ -177,3 +177,4 @@ dist
 folder_structure/
 .qodo
 .gemini/
+.gemini
