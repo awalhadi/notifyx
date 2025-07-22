@@ -90,21 +90,33 @@ NotifyX.clear();
 | `NotifyX.info(message, options?)` | Info notification | `string, Partial<ToastOptions>?` |
 | `NotifyX.clear()` | Clear all notifications | None |
 
-### TypeScript Interface
+### Using TypeScript
+
+NotifyX is written in TypeScript and includes full type definitions. You can import the `ToastOptions` and `ToastType` types for a better development experience.
 
 ```typescript
-interface ToastOptions {
-  message: string;           // Required: Message to display
-  type?: ToastType;         // Optional: 'success' | 'error' | 'warning' | 'info'
-  duration?: number;        // Optional: Duration in ms (0 = persistent)
-  position?: Position;      // Optional: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
-  dismissible?: boolean;    // Optional: Whether toast can be dismissed
-  onClose?: () => void;     // Optional: Callback when toast closes
-  maxToasts?: number;       // Optional: Maximum number of toasts (default: 5)
-}
+import NotifyX, { ToastOptions, ToastType } from 'notifyx';
 
-type ToastType = 'success' | 'error' | 'warning' | 'info';
-type Position = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+// Define options with the ToastOptions type
+const options: ToastOptions = {
+  message: 'This is a typed notification!',
+  type: 'success',
+  position: 'bottom-right',
+  duration: 5000,
+  dismissible: true,
+  onClose: () => console.log('Toast closed!'),
+};
+
+// Show the notification
+NotifyX.show(options);
+
+// You can also define the type for simpler notifications
+const toastType: ToastType = 'info';
+
+NotifyX.show({
+  message: 'Just a simple info toast.',
+  type: toastType,
+});
 ```
 
 ### Default Options
@@ -217,33 +229,7 @@ function deleteItem(id) {
 }
 ```
 
-### TypeScript Examples
 
-```typescript
-import NotifyX, { ToastOptions, POSITIONS } from 'notifyx';
-
-// Typed options
-const options: Partial<ToastOptions> = {
-  position: POSITIONS.BOTTOM_RIGHT,
-  duration: 5000,
-  dismissible: true,
-  onClose: () => console.log('Toast closed')
-};
-
-NotifyX.success('Operation completed!', options);
-
-// Custom notification with full typing
-const customToast: ToastOptions = {
-  message: 'Custom notification',
-  type: 'info',
-  position: 'top-left',
-  duration: 0, // Persistent
-  dismissible: false,
-  onClose: () => console.log('Custom toast closed')
-};
-
-NotifyX.show(customToast);
-```
 
 ## 🎨 Customization
 

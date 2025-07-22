@@ -13,7 +13,7 @@ export class NotifyX {
     toast.className = `notifyx notifyx-${options.type} ${ANIMATION_CLASSES.enter} rounded-lg border shadow-md`;
     toast.setAttribute('role', 'alert');
     toast.setAttribute('aria-live', 'polite');
-    
+
     const message = document.createElement('span');
     message.className = "notifyx-msg";
     message.textContent = options.message;
@@ -39,14 +39,14 @@ export class NotifyX {
     const handleAnimationEnd = () => {
       toastElement.remove();
       toastElement.removeEventListener('animationend', handleAnimationEnd);
-      
+
       // Clean up container if empty
       const container = toastElement.parentElement;
       if (container && container.childNodes.length === 0) {
         container.remove();
       }
     };
-    
+
     toastElement.addEventListener('animationend', handleAnimationEnd);
   }
 
@@ -54,18 +54,18 @@ export class NotifyX {
     const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
     const container = getContainer(mergedOptions.position!);
     const toastElement = this.generateToastElement(mergedOptions);
-    
+
     // Limit number of toasts
     const existingToasts = container.querySelectorAll('.notifyx');
     if (existingToasts.length >= DEFAULT_OPTIONS.maxToasts) {
       const oldestToast = existingToasts[0];
       this.removeToast(oldestToast as HTMLElement);
     }
-    
+
     container.appendChild(toastElement);
 
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    
+
     if (mergedOptions.duration && mergedOptions.duration > 0) {
       timeoutId = setTimeout(() => {
         this.removeToast(toastElement);
@@ -121,5 +121,5 @@ export { ANIMATION_CLASSES, DEFAULT_OPTIONS, POSITIONS } from './constants/index
 if (typeof window !== 'undefined' && !(window as any).NotifyX) {
   (window as any).NotifyX = NotifyX;
 }
-
+export type { ToastOptions, ToastType } from './types';
 export default NotifyX;
