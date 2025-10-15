@@ -4,7 +4,7 @@
 
 [![npm](https://img.shields.io/npm/v/notifyx)](https://www.npmjs.com/package/notifyx)
 
-<!-- [![bundle size](https://img.shields.io/bundlephobia/min/notifyx)](https://bundlephobia.com/package/notifyx) -->
+[![bundle size](https://img.shields.io/bundlephobia/min/notifyx)](https://bundlephobia.com/package/notifyx)
 
 [![license](https://img.shields.io/npm/l/notifyx)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -292,6 +292,21 @@ NotifyX.warning('Important: Please save your work', { duration: 0 });
 // Quick notification (1 second)
 NotifyX.success('Copied!', { duration: 1000 });
 ```
+
+## 🔧 HTML Integration
+```jsx
+<link rel="stylesheet" href="https://unpkg.com/notifyx@latest/dist/notifyx.min.css">
+
+<script type="module" href="https://unpkg.com/notifyx@latest/dist/notifyx.es.js" />
+
+<script>
+  function showNotification(message) {
+    NotifyX.info(message);
+  }
+</script>
+
+```
+
 
 ## 🔧 Framework Integration
 
