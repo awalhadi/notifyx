@@ -175,3 +175,4 @@ dist
 .DS_Store
 folder_structure/
 .qodo
+.vscode
