@@ -1,11 +1,21 @@
 {
   "name": "notifyx",
-  "version": "2.2.34",
+  "version": "2.2.35",
   "author": "A Awal Hadi",
   "type": "module",
   "main": "dist/notifyx.min.js",
   "module": "dist/notifyx.es.js",
+  "types": "./dist/index.d.ts",
   "style": "dist/notifyx.min.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/notifyx.es.js",
+      "require": "./dist/notifyx.min.js",
+      "default": "./dist/notifyx.es.js"
+    },
+    "./style.css": "./dist/notifyx.min.css"
+  },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "@tailwindcss/vite": "^4.0.13",
@@ -22,7 +32,9 @@
   },
   "description": "A lightweight, framework-agnostic toast notification library with built-in Tailwind CSS styles",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "keywords": [
     "notifyx",
@@ -45,6 +57,5 @@
     "dev": "vite",
     "prepare": "npm run build:all"
   },
-  "sideEffects": false,
-  "types": "dist/index.d.ts"
+  "sideEffects": false
 }

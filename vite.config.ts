@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import terser from "@rollup/plugin-terser";
-import { resolve } from "path";
 import dts from "vite-plugin-dts";
 
 export default defineConfig({
@@ -16,20 +15,29 @@ export default defineConfig({
     lib: {
       entry: "./src/index.ts",
       name: "NotifyX",
-      fileName: (format) => `notifyx.${format}.js`,
+      fileName: (format) => {
+        if(format === 'umd') return 'notifyx.min.js';
+        return `notifyx.${format}.js`;
+      },
       formats: ["es", "umd"]
     },
     rollupOptions: {
       external: [],
-      output: {
-        globals: {},
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'style.css') return 'notifyx.min.css';
-          return assetInfo.name;
-        },
-      },
-      plugins: [terser()]
+      plugins: [
+        terser({
+          compress: {
+            drop_console: true,
+            drop_debugger: true,
+            pure_funcs: ['console.log']
+          },
+          format: {
+            comments: false
+          }
+        })
+      ]
     },
-    sourcemap: true,
+    sourcemap: false,
+    minify: 'terser',
+    target: 'esnext'
   }
 });

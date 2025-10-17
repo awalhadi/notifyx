@@ -5,7 +5,7 @@ import { DEFAULT_OPTIONS } from './constants/defaults';
 import { POSITIONS } from './constants/positions';
 
 // Import CSS to ensure styles are included in the build
-import './styles/toast.css';
+// import './styles/toast.css';
 
 export class NotifyX {
   private static generateToastElement(options: ToastOptions): HTMLElement {
@@ -118,7 +118,7 @@ export class NotifyX {
 export { ANIMATION_CLASSES, DEFAULT_OPTIONS, POSITIONS } from './constants/index';
 
 // Check window object to avoid conflicts
-if (typeof window !== 'undefined' && !(window as any).NotifyX) {
+if (typeof window !== 'undefined') {
   (window as any).NotifyX = NotifyX;
 }
 export type { ToastOptions as ToastOptionsType, ToastType } from './types';

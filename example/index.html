@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="../dist/notifyx.min.css" />
     <style>
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          sans-serif;
         margin: 0;
         padding: 20px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -19,7 +20,7 @@
         background: white;
         padding: 40px;
         border-radius: 12px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
       }
       h1 {
         text-align: center;
@@ -42,16 +43,36 @@
         transition: all 0.2s ease;
         color: white;
       }
-      .btn-success { background: #10b981; }
-      .btn-success:hover { background: #059669; }
-      .btn-error { background: #ef4444; }
-      .btn-error:hover { background: #dc2626; }
-      .btn-warning { background: #f59e0b; }
-      .btn-warning:hover { background: #d97706; }
-      .btn-info { background: #3b82f6; }
-      .btn-info:hover { background: #2563eb; }
-      .btn-clear { background: #6b7280; }
-      .btn-clear:hover { background: #4b5563; }
+      .btn-success {
+        background: #10b981;
+      }
+      .btn-success:hover {
+        background: #059669;
+      }
+      .btn-error {
+        background: #ef4444;
+      }
+      .btn-error:hover {
+        background: #dc2626;
+      }
+      .btn-warning {
+        background: #f59e0b;
+      }
+      .btn-warning:hover {
+        background: #d97706;
+      }
+      .btn-info {
+        background: #3b82f6;
+      }
+      .btn-info:hover {
+        background: #2563eb;
+      }
+      .btn-clear {
+        background: #6b7280;
+      }
+      .btn-clear:hover {
+        background: #4b5563;
+      }
       .position-controls {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -87,18 +108,24 @@
   <body>
     <div class="container">
       <h1>🚀 NotifyX Demo</h1>
-      
+
       <div class="position-controls">
-        <button onclick="setPosition('top-right')" class="active">Top Right</button>
+        <button onclick="setPosition('top-right')" class="active">
+          Top Right
+        </button>
         <button onclick="setPosition('top-left')">Top Left</button>
         <button onclick="setPosition('bottom-right')">Bottom Right</button>
         <button onclick="setPosition('bottom-left')">Bottom Left</button>
       </div>
 
       <div class="button-grid">
-        <button class="btn-success" onclick="showSuccess()">Success Toast</button>
+        <button class="btn-success" onclick="showSuccess()">
+          Success Toast
+        </button>
         <button class="btn-error" onclick="showError()">Error Toast</button>
-        <button class="btn-warning" onclick="showWarning()">Warning Toast</button>
+        <button class="btn-warning" onclick="showWarning()">
+          Warning Toast
+        </button>
         <button class="btn-info" onclick="showInfo()">Info Toast</button>
         <button class="btn-clear" onclick="clearAll()">Clear All</button>
       </div>
@@ -118,58 +145,64 @@
       </div>
     </div>
 
+    <script src="../dist/notifyx.min.js"></script>
     <script type="module">
-      import NotifyX from '../dist/notifyx.es.js';
-      
+      // import NotifyX from '../dist/notifyx.es.js';
+
       let currentPosition = 'top-right';
-      
-      window.setPosition = function(position) {
+
+      window.setPosition = function (position) {
         currentPosition = position;
         // Update active button
-        document.querySelectorAll('.position-controls button').forEach(btn => {
-          btn.classList.remove('active');
-        });
+        document
+          .querySelectorAll('.position-controls button')
+          .forEach((btn) => {
+            btn.classList.remove('active');
+          });
         event.target.classList.add('active');
       };
-      
-      window.showSuccess = function() {
+
+      window.showSuccess = function () {
         NotifyX.success('Operation completed successfully! 🎉', {
           position: currentPosition,
-          duration: 4000
+          duration: 4000,
         });
       };
-      
-      window.showError = function() {
+
+      window.showError = function () {
         NotifyX.error('Something went wrong! Please try again.', {
           position: currentPosition,
-          duration: 5000
+          duration: 5000,
         });
       };
-      
-      window.showWarning = function() {
+
+      window.showWarning = function () {
         NotifyX.warning('Please check your input before proceeding.', {
           position: currentPosition,
-          duration: 4000
+          duration: 4000,
         });
       };
-      
-      window.showInfo = function() {
+
+      window.showInfo = function () {
         NotifyX.info('Here is some helpful information for you.', {
           position: currentPosition,
-          duration: 3000
+          duration: 3000,
         });
       };
-      
-      window.clearAll = function() {
+
+      window.clearAll = function () {
         NotifyX.clear();
       };
-      
+
       // Show welcome message
       setTimeout(() => {
-        NotifyX.info('Welcome to NotifyX! Click the buttons above to see different toast types.', {
-          position: 'top-right',
-          duration: 5000
-        });
+        NotifyX.info(
+          'Welcome to NotifyX! Click the buttons above to see different toast types.',
+          {
+            position: 'top-right',
+            duration: 5000,
+          },
+        );
       }, 1000);
     </script>
   </body>

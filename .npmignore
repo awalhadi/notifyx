@@ -1,0 +1,36 @@
+# Source files
+!dist/notifyx.css
+src/
+*.ts
+!*.d.ts
+
+# Config files
+vite.config copy.ts
+vite.config.ts
+tsconfig.json
+tailwind.config.*
+postcss.config.*
+
+# Development files
+.vscode/
+.idea/
+*.log
+.env*
+
+# Tests
+example/
+folder_structure/
+test/
+tests/
+__tests__/
+*.test.*
+*.spec.*
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Other
+node_modules/
+.qodo

@@ -297,7 +297,7 @@ NotifyX.success('Copied!', { duration: 1000 });
 ```jsx
 <link rel="stylesheet" href="https://unpkg.com/notifyx@latest/dist/notifyx.min.css">
 
-<script type="module" href="https://unpkg.com/notifyx@latest/dist/notifyx.es.js" />
+<script href="https://unpkg.com/notifyx@latest/dist/notifyx.min.js" />
 
 <script>
   function showNotification(message) {

@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@source "../**/*.ts";
+@source "../**/*.tsx";
+@source "../*.ts";
+
+
 @theme {
   --animate-fade-in: fade-in 0.3s ease-out;
   --animate-fade-out: fade-out 0.3s ease-out;
