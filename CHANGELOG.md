@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added CONTRIBUTING.md with development guidelines
 - Added inline JSDoc for all public APIs
 
-## [3.0.0] - Previous Release
+## [2.3.0] - Previous Release
 
 ### Features
 - Framework-agnostic toast notifications

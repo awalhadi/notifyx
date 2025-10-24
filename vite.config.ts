@@ -3,7 +3,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import dts from "vite-plugin-dts";
 
 const banner = `/*!
- * NotifyX v3.0.0
+ * NotifyX v2.3.0
  * A lightweight, framework-agnostic toast notification library
  * https://github.com/awalhadi/notifyx
  * @author A Awal Hadi
