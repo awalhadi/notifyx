@@ -87,7 +87,7 @@ bun add notifyx
 
 ```javascript
 import NotifyX from 'notifyx';
-import 'notifyx/dist/notifyx.min.css';
+import 'notifyx/style.css';
 ```
 
 **Step 2:** Show your first notification
@@ -391,7 +391,7 @@ function performBatchOperation(items) {
 ```jsx
 import React from 'react';
 import NotifyX from 'notifyx';
-import 'notifyx/dist/notifyx.min.css';
+import 'notifyx/style.css';
 
 function App() {
   const handleClick = () => {
@@ -413,7 +413,7 @@ export default App;
 ```jsx
 import { useCallback } from 'react';
 import NotifyX from 'notifyx';
-import 'notifyx/dist/notifyx.min.css';
+import 'notifyx/style.css';
 
 // Custom hook for notifications
 function useNotification() {
@@ -461,7 +461,7 @@ function MyComponent() {
 'use client';
 
 import NotifyX from 'notifyx';
-import 'notifyx/dist/notifyx.min.css';
+import 'notifyx/style.css';
 
 export default function ToastButton() {
   return (
@@ -479,7 +479,7 @@ export default function ToastButton() {
 
 ```tsx
 // app/layout.tsx
-import 'notifyx/dist/notifyx.min.css';
+import 'notifyx/style.css';
 import './globals.css';
 
 export default function RootLayout({ 
@@ -516,7 +516,7 @@ export default function Home() {
 ```tsx
 // pages/_app.tsx
 import type { AppProps } from 'next/app';
-import 'notifyx/dist/notifyx.min.css';
+import 'notifyx/style.css';
 import '../styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -609,7 +609,7 @@ export default function SaveButton() {
 
 <script setup>
 import NotifyX from 'notifyx';
-import 'notifyx/dist/notifyx.min.css';
+import 'notifyx/style.css';
 
 const showSuccess = () => {
   NotifyX.success('Operation successful!');
@@ -688,7 +688,7 @@ export class AppComponent {
 {
   "styles": [
     "src/styles.css",
-    "node_modules/notifyx/dist/notifyx.min.css"
+    "node_modules/notifyx/style.css"
   ]
 }
 ```
@@ -761,7 +761,7 @@ npm install notifyx
 ```javascript
 // resources/js/app.js
 import NotifyX from 'notifyx';
-import 'notifyx/dist/notifyx.min.css';
+import 'notifyx/style.css';
 
 // Make NotifyX globally available
 window.NotifyX = NotifyX;
@@ -1313,7 +1313,7 @@ function showStyledToast(message, type = 'info') {
 
 **Solution**: Make sure you've imported the CSS:
 ```javascript
-import 'notifyx/dist/notifyx.min.css';
+import 'notifyx/style.css';
 ```
 
 For CDN:
