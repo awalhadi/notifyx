@@ -31,9 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added CONTRIBUTING.md with development guidelines
 - Added inline JSDoc for all public APIs
 
-## [2.3.0] - Previous Release
+## [2.3.1] - Previous Release
 
 ### Features
+- Improve Details documentation
 - Framework-agnostic toast notifications
 - TypeScript support with full type definitions
 - Multiple toast types: success, error, warning, info

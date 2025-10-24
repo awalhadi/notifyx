@@ -1,6 +1,6 @@
 {
   "name": "notifyx",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "author": "A Awal Hadi",
   "type": "module",
   "main": "dist/notifyx.min.js",
@@ -27,7 +27,7 @@
     "vite-plugin-dts": "^4.0.0",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "description": "A lightweight, framework-agnostic toast notification library with built-in Tailwind CSS styles",
+  "description": "Lightweight toast notifications for React, Next.js, Vue, Angular, Svelte, and Vanilla JS. Beautiful Tailwind CSS styles, zero dependencies, and TypeScript types.",
   "files": [
     "dist/*.js",
     "dist/*.css",
@@ -36,18 +36,30 @@
     "LICENSE"
   ],
   "keywords": [
-    "notifyx",
     "toast",
+    "toast notifications",
+    "toast messages",
     "notification",
-    "alert",
     "notify",
-    "typescript",
-    "tailwindcss",
-    "toast",
-    "framework-agnostic",
-    "tailwindcss",
-    "css-in-js"
+    "alert",
+    "react toast",
+    "nextjs toast",
+    "vanilla js toast",
+    "vue toast",
+    "svelte toast",
+    "angular toast",
+    "react-notifications",
+    "notifyx"
   ],
+  "homepage": "https://github.com/awalhadi/notifyx#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awalhadi/notifyx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/awalhadi/notifyx/issues"
+  },
+
   "license": "MIT",
   "scripts": {
     "build": "vite build",
