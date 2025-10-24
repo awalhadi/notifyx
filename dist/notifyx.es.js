@@ -1,14 +1,8 @@
 /*!
- * NotifyX v3.0.0
+ * NotifyX v2.3.0
  * A lightweight, framework-agnostic toast notification library
- * 
- * @license MIT
- * @author A Awal Hadi
- * @preserve
- * 
- * Copyright (c) 2025 A Awal Hadi
- * Released under the MIT License
  * https://github.com/awalhadi/notifyx
+ * @author A Awal Hadi
  */
 const containerCache = /* @__PURE__ */ new Map();
 const createToastContainer = (position) => {
