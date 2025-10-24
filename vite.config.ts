@@ -1,7 +1,13 @@
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import terser from "@rollup/plugin-terser";
 import dts from "vite-plugin-dts";
+
+const banner = `/*!
+ * NotifyX v3.0.0
+ * A lightweight, framework-agnostic toast notification library
+ * https://github.com/awalhadi/notifyx
+ * @author A Awal Hadi
+ */`;
 
 export default defineConfig({
   plugins: [
@@ -23,21 +29,30 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [],
-      plugins: [
-        terser({
-          compress: {
-            drop_console: true,
-            drop_debugger: true,
-            pure_funcs: ['console.log']
-          },
-          format: {
-            comments: false
-          }
-        })
-      ]
+      output: {
+        // Avoid warning for mixing default and named exports in UMD build
+        exports: 'named',
+        banner
+      }
     },
     sourcemap: false,
     minify: 'terser',
+    // Production-grade JS minification via Terser
+    terserOptions: {
+      ecma: 2020,
+      compress: {
+        // safe compress defaults for libraries
+        passes: 2,
+        pure_getters: true,
+        toplevel: true,
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log']
+      },
+      mangle: {
+        toplevel: true
+      }
+    },
     target: 'esnext'
   }
 });

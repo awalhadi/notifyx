@@ -1,6 +1,6 @@
 {
   "name": "notifyx",
-  "version": "2.2.35",
+  "version": "3.0.0",
   "author": "A Awal Hadi",
   "type": "module",
   "main": "dist/notifyx.min.js",
@@ -17,12 +17,9 @@
     "./style.css": "./dist/notifyx.min.css"
   },
   "devDependencies": {
-    "@rollup/plugin-terser": "^0.4.4",
-    "@tailwindcss/vite": "^4.0.13",
     "@types/bun": "latest",
     "@types/node": "^20.0.0",
-    "@vitejs/plugin-legacy": "^5.0.0",
-    "autoprefixer": "^10.4.20",
+    
     "tailwindcss": "^4.1.11",
     "terser": "^5.37.0",
     "typescript": "^5.8.2",
@@ -32,7 +29,9 @@
   },
   "description": "A lightweight, framework-agnostic toast notification library with built-in Tailwind CSS styles",
   "files": [
-    "dist",
+    "dist/*.js",
+    "dist/*.css",
+    "dist/*.d.ts",
     "README.md",
     "LICENSE"
   ],
@@ -54,6 +53,7 @@
     "build": "vite build",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/toast.css -o ./dist/notifyx.min.css --minify",
     "build:all": "npm run build && npm run build:css",
+    "verify": "bash scripts/verify-build.sh",
     "dev": "vite",
     "prepare": "npm run build:all"
   },

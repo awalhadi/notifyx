@@ -1,5 +1,9 @@
 import { POSITIONS } from './positions';
 
+/**
+ * Default toast configuration
+ * @public
+ */
 export const DEFAULT_OPTIONS = {
   type: 'info' as const,
   duration: 3000,

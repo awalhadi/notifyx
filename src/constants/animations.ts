@@ -1,3 +1,7 @@
+/**
+ * CSS animation class names
+ * @public
+ */
 export const ANIMATION_CLASSES = {
   enter: 'notifyx-enter',
   exit: 'notifyx-exit',

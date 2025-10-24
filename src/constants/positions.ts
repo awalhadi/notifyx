@@ -5,4 +5,8 @@ export const POSITIONS = {
   BOTTOM_LEFT: 'bottom-left'
 } as const;
 
+/**
+ * Toast position type
+ * @public
+ */
 export type Position = typeof POSITIONS[keyof typeof POSITIONS];
