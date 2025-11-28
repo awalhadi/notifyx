@@ -3,207 +3,402 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NotifyX Demo</title>
+    <title>NotifyX - Premium Toast Notifications Demo</title>
     <link rel="stylesheet" href="../dist/notifyx.min.css" />
     <style>
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-          sans-serif;
+      * {
         margin: 0;
-        padding: 20px;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
       }
+
       .container {
         max-width: 800px;
-        margin: 0 auto;
-        background: white;
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       }
+
       h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 0.5rem;
         text-align: center;
-        color: #333;
-        margin-bottom: 30px;
       }
+
+      .subtitle {
+        text-align: center;
+        color: #718096;
+        font-size: 1.1rem;
+        margin-bottom: 2.5rem;
+      }
+
+      .section {
+        margin-bottom: 2rem;
+      }
+
+      .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
       .button-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-        margin-bottom: 30px;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
       }
+
       button {
-        padding: 12px 24px;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
         border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 500;
+        border-radius: 12px;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, #10b981, #059669);
         color: white;
       }
-      .btn-success {
-        background: #10b981;
-      }
-      .btn-success:hover {
-        background: #059669;
-      }
+
       .btn-error {
-        background: #ef4444;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
       }
-      .btn-error:hover {
-        background: #dc2626;
-      }
+
       .btn-warning {
-        background: #f59e0b;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
       }
-      .btn-warning:hover {
-        background: #d97706;
-      }
+
       .btn-info {
-        background: #3b82f6;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
       }
-      .btn-info:hover {
-        background: #2563eb;
+
+      .btn-default {
+        background: linear-gradient(135deg, #64748b, #475569);
+        color: white;
       }
+
+      .btn-loading {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+      }
+
+      .btn-promise {
+        background: linear-gradient(135deg, #ec4899, #db2777);
+        color: white;
+      }
+
       .btn-clear {
-        background: #6b7280;
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
       }
-      .btn-clear:hover {
-        background: #4b5563;
-      }
-      .position-controls {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        margin-bottom: 20px;
-      }
-      .position-controls button {
-        background: #8b5cf6;
-        font-size: 14px;
-      }
-      .position-controls button:hover {
-        background: #7c3aed;
-      }
-      .position-controls button.active {
-        background: #5b21b6;
-      }
-      .features {
-        background: #f8fafc;
-        padding: 20px;
+
+      .code-block {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 1rem;
         border-radius: 8px;
-        margin-top: 30px;
+        font-family: "Courier New", monospace;
+        font-size: 0.875rem;
+        margin-top: 1rem;
+        overflow-x: auto;
       }
-      .features h3 {
-        margin-top: 0;
-        color: #374151;
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
       }
-      .features ul {
-        color: #6b7280;
-        line-height: 1.6;
+
+      .feature {
+        padding: 1rem;
+        background: #f7fafc;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .feature h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+      }
+
+      .feature p {
+        font-size: 0.875rem;
+        color: #718096;
+      }
+
+      @media (max-width: 640px) {
+        .container {
+          padding: 2rem 1.5rem;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+
+        .button-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        }
+
+        .container {
+          background: rgba(30, 41, 59, 0.95);
+        }
+
+        h1 {
+          color: #f1f5f9;
+        }
+
+        .subtitle {
+          color: #cbd5e1;
+        }
+
+        .section-title {
+          color: #e2e8f0;
+          border-bottom-color: #475569;
+        }
+
+        .feature {
+          background: #1e293b;
+          border-color: #475569;
+        }
+
+        .feature h3 {
+          color: #e2e8f0;
+        }
+
+        .feature p {
+          color: #94a3b8;
+        }
       }
     </style>
   </head>
+
   <body>
     <div class="container">
-      <h1>🚀 NotifyX Demo</h1>
+      <h1>🎉 NotifyX</h1>
+      <p class="subtitle">
+        Premium Toast Notifications with Beautiful Glassmorphism Design
+      </p>
 
-      <div class="position-controls">
-        <button onclick="setPosition('top-right')" class="active">
-          Top Right
-        </button>
-        <button onclick="setPosition('top-left')">Top Left</button>
-        <button onclick="setPosition('bottom-right')">Bottom Right</button>
-        <button onclick="setPosition('bottom-left')">Bottom Left</button>
+      <div class="section">
+        <h2 class="section-title">Basic Notifications</h2>
+        <div class="button-grid">
+          <button
+            class="btn-success"
+            onclick="NotifyX.success('Operation completed successfully! 🎉')"
+          >
+            Success
+          </button>
+          <button
+            class="btn-error"
+            onclick="NotifyX.error('Something went wrong! Please try again.')"
+          >
+            Error
+          </button>
+          <button
+            class="btn-warning"
+            onclick="NotifyX.warning('Please review your changes before proceeding.')"
+          >
+            Warning
+          </button>
+          <button
+            class="btn-info"
+            onclick="NotifyX.info('Here is some helpful information for you.')"
+          >
+            Info
+          </button>
+        </div>
       </div>
 
-      <div class="button-grid">
-        <button class="btn-success" onclick="showSuccess()">
-          Success Toast
-        </button>
-        <button class="btn-error" onclick="showError()">Error Toast</button>
-        <button class="btn-warning" onclick="showWarning()">
-          Warning Toast
-        </button>
-        <button class="btn-info" onclick="showInfo()">Info Toast</button>
-        <button class="btn-clear" onclick="clearAll()">Clear All</button>
+      <div class="section">
+        <h2 class="section-title">Advanced Features</h2>
+        <div class="button-grid">
+          <button
+            class="btn-loading"
+            onclick="NotifyX.loading('Processing your request...')"
+          >
+            Loading
+          </button>
+          <button class="btn-promise" onclick="testPromise()">
+            Promise Toast
+          </button>
+          <button class="btn-default" onclick="showCustomIcon()">
+            Custom Icon
+          </button>
+          <button class="btn-clear" onclick="NotifyX.clear()">Clear All</button>
+        </div>
       </div>
 
-      <div class="features">
-        <h3>✨ Features</h3>
-        <ul>
-          <li>🎨 Built-in Tailwind CSS styles (no Tailwind required)</li>
-          <li>🌙 Automatic dark mode support</li>
-          <li>♿ Accessibility features (ARIA attributes)</li>
-          <li>🎭 Smooth CSS animations</li>
-          <li>📱 Responsive design</li>
-          <li>⚡ Lightweight and fast</li>
-          <li>🔧 TypeScript support</li>
-          <li>🎯 Framework agnostic</li>
-        </ul>
+      <div class="section">
+        <h2 class="section-title">Positions Demo</h2>
+        <div class="button-grid">
+          <button
+            class="btn-info"
+            onclick="NotifyX.info('Top Right', { position: 'top-right' })"
+          >
+            Top Right
+          </button>
+          <button
+            class="btn-info"
+            onclick="NotifyX.info('Top Left', { position: 'top-left' })"
+          >
+            Top Left
+          </button>
+          <button
+            class="btn-info"
+            onclick="NotifyX.info('Top Center', { position: 'top-center' })"
+          >
+            Top Center
+          </button>
+          <button
+            class="btn-info"
+            onclick="NotifyX.info('Bottom Right', { position: 'bottom-right' })"
+          >
+            Bottom Right
+          </button>
+          <button
+            class="btn-info"
+            onclick="NotifyX.info('Bottom Left', { position: 'bottom-left' })"
+          >
+            Bottom Left
+          </button>
+          <button
+            class="btn-info"
+            onclick="NotifyX.info('Bottom Center', { position: 'bottom-center' })"
+          >
+            Bottom Center
+          </button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">✨ Key Features</h2>
+        <div class="features">
+          <div class="feature">
+            <h3>🎨 Premium Design</h3>
+            <p>Beautiful glassmorphism with smooth animations</p>
+          </div>
+          <div class="feature">
+            <h3>🪶 Lightweight</h3>
+            <p>Only 1.4KB gzipped</p>
+          </div>
+          <div class="feature">
+            <h3>📱 Responsive</h3>
+            <p>Perfect on all devices</p>
+          </div>
+          <div class="feature">
+            <h3>♿ Accessible</h3>
+            <p>Full ARIA support</p>
+          </div>
+          <div class="feature">
+            <h3>🌙 Dark Mode</h3>
+            <p>Auto dark mode ready</p>
+          </div>
+          <div class="feature">
+            <h3>⚡ Promise Support</h3>
+            <p>Track async operations</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div>// Basic Usage</div>
+        <div>NotifyX.success('Success!');</div>
+        <div>NotifyX.error('Error occurred');</div>
+        <div></div>
+        <div>// Promise Support</div>
+        <div>await NotifyX.promise(fetchData(), {</div>
+        <div>loading: 'Loading...',</div>
+        <div>success: 'Done!',</div>
+        <div>error: 'Failed!'</div>
+        <div>});</div>
       </div>
     </div>
 
     <script src="../dist/notifyx.min.js"></script>
-    <script type="module">
-      // import NotifyX from '../dist/notifyx.es.js';
+    <script>
+      // Promise toast demo
+      async function testPromise() {
+        const mockPromise = new Promise((resolve, reject) => {
+          setTimeout(() => {
+            Math.random() > 0.5
+              ? resolve("Success!")
+              : reject(new Error("Failed!"));
+          }, 2000);
+        });
 
-      let currentPosition = 'top-right';
-
-      window.setPosition = function (position) {
-        currentPosition = position;
-        // Update active button
-        document
-          .querySelectorAll('.position-controls button')
-          .forEach((btn) => {
-            btn.classList.remove('active');
+        try {
+          await NotifyX.promise(mockPromise, {
+            loading: "Processing your request...",
+            success: "Operation completed successfully!",
+            error: "Operation failed. Please try again.",
           });
-        event.target.classList.add('active');
-      };
+        } catch (error) {
+          console.log("Promise rejected:", error);
+        }
+      }
 
-      window.showSuccess = function () {
-        NotifyX.success('Operation completed successfully! 🎉', {
-          position: currentPosition,
+      // Custom icon demo
+      function showCustomIcon() {
+        NotifyX.success("Payment received!", {
+          icon: "💰",
           duration: 4000,
         });
-      };
-
-      window.showError = function () {
-        NotifyX.error('Something went wrong! Please try again.', {
-          position: currentPosition,
-          duration: 5000,
-        });
-      };
-
-      window.showWarning = function () {
-        NotifyX.warning('Please check your input before proceeding.', {
-          position: currentPosition,
-          duration: 4000,
-        });
-      };
-
-      window.showInfo = function () {
-        NotifyX.info('Here is some helpful information for you.', {
-          position: currentPosition,
-          duration: 3000,
-        });
-      };
-
-      window.clearAll = function () {
-        NotifyX.clear();
-      };
+      }
 
       // Show welcome message
       setTimeout(() => {
         NotifyX.info(
-          'Welcome to NotifyX! Click the buttons above to see different toast types.',
+          "Welcome to NotifyX! Try out the different notification types.",
           {
-            position: 'top-right',
             duration: 5000,
-          },
+            position: "top-center",
+          }
         );
-      }, 1000);
+      }, 500);
     </script>
   </body>
 </html>

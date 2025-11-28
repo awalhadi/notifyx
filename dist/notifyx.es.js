@@ -40,61 +40,129 @@ const ANIMATION_CLASSES = {
 const POSITIONS = {
   TOP_RIGHT: "top-right",
   TOP_LEFT: "top-left",
+  TOP_CENTER: "top-center",
   BOTTOM_RIGHT: "bottom-right",
-  BOTTOM_LEFT: "bottom-left"
+  BOTTOM_LEFT: "bottom-left",
+  BOTTOM_CENTER: "bottom-center",
+  CENTER: "center"
+  // For loading toasts
 };
 
 const DEFAULT_OPTIONS = {
-  type: "info",
+  type: "default",
   duration: 3e3,
+  showProgress: true,
+  showIcon: true,
+  pauseOnHover: true,
   position: POSITIONS.TOP_RIGHT,
   dismissible: true,
   maxToasts: 5
 };
 
+const TOAST_ICONS = {
+  success: "✓",
+  error: "✕",
+  warning: "⚠",
+  info: "ℹ",
+  default: "●"
+};
+let activeLoadingToast = null;
 class NotifyX {
   /**
-   * Creates the toast DOM element with proper structure and accessibility
+   * Creates the toast DOM element
    * @private
    */
   static createToastElement(options) {
     const toast = document.createElement("div");
-    toast.className = `notifyx notifyx-${options.type} ${ANIMATION_CLASSES.enter} rounded-lg border shadow-md`;
+    toast.className = `notifyx notifyx-${options.type} ${ANIMATION_CLASSES.enter}`;
     toast.setAttribute("role", "alert");
-    toast.setAttribute("aria-live", "polite");
+    toast.setAttribute(
+      "aria-live",
+      options.type === "error" ? "assertive" : "polite"
+    );
+    toast.setAttribute("aria-atomic", "true");
+    const contentWrapper = document.createElement("div");
+    contentWrapper.className = "notifyx-content";
+    if (options.showIcon) {
+      const icon = document.createElement("div");
+      icon.className = "notifyx-icon";
+      icon.textContent = options.icon || TOAST_ICONS[options.type];
+      icon.setAttribute("aria-hidden", "true");
+      contentWrapper.appendChild(icon);
+    }
     const message = document.createElement("span");
     message.className = "notifyx-msg";
     message.textContent = options.message;
-    toast.appendChild(message);
+    contentWrapper.appendChild(message);
     if (options.dismissible) {
-      toast.appendChild(this.createCloseButton(toast));
+      contentWrapper.appendChild(this.createCloseButton(toast, options));
+    }
+    toast.appendChild(contentWrapper);
+    if (options.showProgress && options.duration && options.duration > 0) {
+      const progressBar = document.createElement("div");
+      progressBar.className = "notifyx-progress-bar";
+      toast.appendChild(progressBar);
     }
     return toast;
   }
   /**
-   * Creates a close button for dismissible toasts
+   * Creates loader element for loading state
    * @private
    */
-  static createCloseButton(toast) {
+  static createLoaderElement(options) {
+    const toast = document.createElement("div");
+    toast.className = `notifyx notifyx-${options.type} ${ANIMATION_CLASSES.enter}`;
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    toast.setAttribute("aria-busy", "true");
+    const loaderWrapper = document.createElement("div");
+    loaderWrapper.className = "notifyx-loader";
+    const spinner = document.createElement("div");
+    spinner.className = "notifyx-spinner";
+    spinner.setAttribute("aria-label", "Loading");
+    loaderWrapper.appendChild(spinner);
+    if (options.message) {
+      const message = document.createElement("span");
+      message.className = "notifyx-msg";
+      message.textContent = options.message;
+      loaderWrapper.appendChild(message);
+    }
+    toast.appendChild(loaderWrapper);
+    return toast;
+  }
+  /**
+   * Creates simple close button (just × icon)
+   * @private
+   */
+  static createCloseButton(toast, options) {
     const button = document.createElement("button");
     button.className = "notifyx-close";
-    button.innerHTML = "✕";
     button.setAttribute("aria-label", "Close notification");
     button.setAttribute("type", "button");
-    button.onclick = () => this.removeToast(toast);
+    button.onclick = () => this.removeToast(toast, options.onClose);
     return button;
   }
   /**
    * Removes a toast with exit animation
    * @private
    */
-  static removeToast(toastElement) {
+  static removeToast(toastElement, onClose) {
+    const timeoutData = toastElement.__notifyxTimeout;
+    if (timeoutData && timeoutData.timeoutId !== null) {
+      clearTimeout(timeoutData.timeoutId);
+    }
+    const pauseTimer = toastElement.__notifyxPauseTimer;
+    const resumeTimer = toastElement.__notifyxResumeTimer;
+    if (pauseTimer) toastElement.removeEventListener("mouseenter", pauseTimer);
+    if (resumeTimer)
+      toastElement.removeEventListener("mouseleave", resumeTimer);
     toastElement.classList.remove(ANIMATION_CLASSES.enter);
     toastElement.classList.add(ANIMATION_CLASSES.exit);
     const handleAnimationEnd = () => {
       toastElement.remove();
       toastElement.removeEventListener("animationend", handleAnimationEnd);
       this.cleanupEmptyContainer(toastElement.parentElement);
+      onClose?.();
     };
     toastElement.addEventListener("animationend", handleAnimationEnd);
   }
@@ -108,102 +176,185 @@ class NotifyX {
     }
   }
   /**
-   * Manages auto-dismiss timer for a toast
+   * FIXED: Manages auto-dismiss timer with pause on hover
    * @private
    */
   static setupAutoDismiss(toastElement, options) {
-    if (!options.duration || options.duration <= 0) return null;
-    return window.setTimeout(() => {
-      this.removeToast(toastElement);
-      options.onClose?.();
-    }, options.duration);
-  }
-  /**
-   * Updates close button to clear timeout on manual dismiss
-   * @private
-   */
-  static attachCloseHandler(toastElement, timeoutId, onClose) {
-    const closeButton = toastElement.querySelector(".notifyx-close");
-    if (!closeButton) return;
-    const originalOnClick = closeButton.onclick;
-    closeButton.onclick = (e) => {
-      if (timeoutId !== null) clearTimeout(timeoutId);
-      onClose?.();
-      originalOnClick?.call(closeButton, e);
+    if (!options.duration || options.duration <= 0) return;
+    const timeoutData = {
+      timeoutId: null,
+      startTime: Date.now(),
+      remainingTime: options.duration,
+      isPaused: false
     };
+    const progressBar = toastElement.querySelector(
+      ".notifyx-progress-bar"
+    );
+    if (progressBar) {
+      progressBar.style.width = "100%";
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          progressBar.style.transition = `width ${options.duration}ms linear`;
+          progressBar.style.width = "0%";
+        });
+      });
+    }
+    const pauseTimer = () => {
+      if (!timeoutData.isPaused && timeoutData.timeoutId !== null) {
+        timeoutData.isPaused = true;
+        const elapsed = Date.now() - timeoutData.startTime;
+        timeoutData.remainingTime = Math.max(
+          0,
+          timeoutData.remainingTime - elapsed
+        );
+        if (progressBar) {
+          const computedStyle = window.getComputedStyle(progressBar);
+          const currentWidth = computedStyle.width;
+          progressBar.style.transition = "none";
+          progressBar.style.width = currentWidth;
+          void progressBar.offsetWidth;
+        }
+        clearTimeout(timeoutData.timeoutId);
+        timeoutData.timeoutId = null;
+      }
+    };
+    const resumeTimer = () => {
+      if (timeoutData.isPaused && timeoutData.remainingTime > 0) {
+        timeoutData.isPaused = false;
+        timeoutData.startTime = Date.now();
+        if (progressBar) {
+          requestAnimationFrame(() => {
+            progressBar.style.transition = `width ${timeoutData.remainingTime}ms linear`;
+            progressBar.style.width = "0%";
+          });
+        }
+        timeoutData.timeoutId = window.setTimeout(() => {
+          this.removeToast(toastElement, options.onClose);
+        }, timeoutData.remainingTime);
+      }
+    };
+    toastElement.__notifyxPauseTimer = pauseTimer;
+    toastElement.__notifyxResumeTimer = resumeTimer;
+    if (options.pauseOnHover) {
+      toastElement.addEventListener("mouseenter", pauseTimer);
+      toastElement.addEventListener("mouseleave", resumeTimer);
+    }
+    timeoutData.timeoutId = window.setTimeout(() => {
+      this.removeToast(toastElement, options.onClose);
+    }, options.duration);
+    toastElement.__notifyxTimeout = timeoutData;
   }
   /**
-   * Enforces maximum toast limit by removing oldest
+   * Enforces maximum toast limit
    * @private
    */
-  static enforceMaxToasts(container) {
+  static enforceMaxToasts(container, maxToasts) {
     const existingToasts = container.querySelectorAll(".notifyx");
-    if (existingToasts.length >= DEFAULT_OPTIONS.maxToasts) {
-      this.removeToast(existingToasts[0]);
+    if (existingToasts.length >= maxToasts) {
+      const toastToRemove = existingToasts[0];
+      this.removeToast(toastToRemove);
     }
   }
   /**
    * Display a toast notification
-   * @param options - Configuration for the toast
    * @public
-   * @example
-   * ```ts
-   * NotifyX.show({
-   *   message: 'Success!',
-   *   type: 'success',
-   *   duration: 3000
-   * });
-   * ```
    */
   static show(options) {
-    const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
+    const mergedOptions = {
+      ...DEFAULT_OPTIONS,
+      ...options
+    };
     const container = getContainer(mergedOptions.position);
-    this.enforceMaxToasts(container);
+    this.enforceMaxToasts(container, mergedOptions.maxToasts);
     const toastElement = this.createToastElement(mergedOptions);
     container.appendChild(toastElement);
-    const timeoutId = this.setupAutoDismiss(toastElement, mergedOptions);
-    if (mergedOptions.dismissible) {
-      this.attachCloseHandler(toastElement, timeoutId, mergedOptions.onClose);
-    }
+    this.setupAutoDismiss(toastElement, mergedOptions);
   }
   /**
-   * Display a success toast notification
-   * @param message - The message to display
-   * @param options - Optional configuration overrides
+   * Display a success toast
    * @public
    */
   static success(message, options) {
     this.show({ ...options, message, type: "success" });
   }
   /**
-   * Display an error toast notification
-   * @param message - The message to display
-   * @param options - Optional configuration overrides
+   * Display an error toast
    * @public
    */
   static error(message, options) {
     this.show({ ...options, message, type: "error" });
   }
   /**
-   * Display a warning toast notification
-   * @param message - The message to display
-   * @param options - Optional configuration overrides
+   * Display a warning toast
    * @public
    */
   static warning(message, options) {
     this.show({ ...options, message, type: "warning" });
   }
   /**
-   * Display an info toast notification
-   * @param message - The message to display
-   * @param options - Optional configuration overrides
+   * Display an info toast
    * @public
    */
   static info(message, options) {
     this.show({ ...options, message, type: "info" });
   }
   /**
-   * Clear all active toast notifications
+   * PRODUCTION GRADE LOADING - Centered, beautiful spinner
+   * @public
+   */
+  static loading(message, options) {
+    if (activeLoadingToast) {
+      this.removeToast(activeLoadingToast);
+      activeLoadingToast = null;
+    }
+    const mergedOptions = {
+      ...DEFAULT_OPTIONS,
+      ...options,
+      message,
+      type: "info",
+      duration: 0,
+      // Persistent
+      showProgress: false,
+      dismissible: false,
+      position: "center"
+      // Special center position for loading
+    };
+    const container = getContainer("center");
+    const loaderElement = this.createLoaderElement(mergedOptions);
+    container.appendChild(loaderElement);
+    activeLoadingToast = loaderElement;
+  }
+  /**
+   * Dismiss the active loading toast
+   * @public
+   */
+  static dismissLoading() {
+    if (activeLoadingToast) {
+      this.removeToast(activeLoadingToast);
+      activeLoadingToast = null;
+    }
+  }
+  /**
+   * IMPROVED: Promise support with proper loading management
+   * @public
+   */
+  static async promise(promise, messages, options) {
+    this.loading(messages.loading, options);
+    try {
+      const result = await promise;
+      this.dismissLoading();
+      const successMessage = typeof messages.success === "function" ? messages.success(result) : messages.success;
+      this.success(successMessage, options);
+      return result;
+    } catch (error) {
+      this.dismissLoading();
+      const errorMessage = typeof messages.error === "function" ? messages.error(error) : messages.error;
+      this.error(errorMessage, options);
+      throw error;
+    }
+  }
+  /**
+   * Clear all active toasts
    * @public
    */
   static clear() {
@@ -214,6 +365,7 @@ class NotifyX {
         this.removeToast(toast);
       });
     });
+    activeLoadingToast = null;
   }
 }
 if (typeof window !== "undefined") {

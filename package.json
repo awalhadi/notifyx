@@ -1,6 +1,6 @@
 {
   "name": "notifyx",
-  "version": "2.3.2",
+  "version": "3.0.0",
   "author": "A Awal Hadi",
   "type": "module",
   "main": "dist/notifyx.min.js",
@@ -19,7 +19,6 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^20.0.0",
-    
     "tailwindcss": "^4.1.11",
     "terser": "^5.37.0",
     "typescript": "^5.8.2",
@@ -27,7 +26,7 @@
     "vite-plugin-dts": "^4.0.0",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "description": "Lightweight toast notifications for React, Next.js, Vue, Angular, Svelte, and Vanilla JS. Beautiful Tailwind CSS styles, zero dependencies, and TypeScript types.",
+  "description": "Lightweight toast notifications for React, Next.js, Vue, Angular, Svelte, and Vanilla JS. Beautiful Tailwind CSS styles, zero dependencies, and TypeScript types. Premium toast notifications with beautiful glassmorphism design. Lightweight (1.4KB), framework-agnostic, TypeScript support, promise-based API, and zero dependencies.",
   "files": [
     "dist/*.js",
     "dist/*.css",
@@ -49,7 +48,21 @@
     "svelte toast",
     "angular toast",
     "react-notifications",
-    "notifyx"
+    "notifyx",
+    "snackbar",
+    "message",
+    "typescript toast",
+    "glassmorphism",
+    "premium ui",
+    "promise toast",
+    "async notifications",
+    "lightweight",
+    "zero dependencies",
+    "framework agnostic",
+    "accessible",
+    "aria",
+    "dark mode",
+    "responsive"
   ],
   "homepage": "https://github.com/awalhadi/notifyx#readme",
   "repository": {
@@ -59,15 +72,14 @@
   "bugs": {
     "url": "https://github.com/awalhadi/notifyx/issues"
   },
-
   "license": "MIT",
   "scripts": {
     "build": "vite build",
     "build:css": "npx @tailwindcss/cli -i ./src/styles/toast.css -o ./dist/notifyx.min.css --minify",
-    "build:all": "npm run build && npm run build:css",
+    "build:all": "bun run build && bun run build:css",
     "verify": "bash scripts/verify-build.sh",
     "dev": "vite",
-    "prepare": "npm run build:all"
+    "prepare": "bun run build:all"
   },
   "sideEffects": false
 }
