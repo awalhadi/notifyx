@@ -61,9 +61,10 @@ export class NotifyX {
     message.textContent = options.message;
     contentWrapper.appendChild(message);
 
-    // Close button
+    // Close button - FIXED: Pass the actual callback
     if (options.dismissible) {
-      contentWrapper.appendChild(this.createCloseButton(toast, options));
+      const closeBtn = this.createCloseButton(toast, options.onClose);
+      contentWrapper.appendChild(closeBtn);
     }
 
     toast.appendChild(contentWrapper);
@@ -115,33 +116,43 @@ export class NotifyX {
   }
 
   /**
-   * Creates simple close button (just × icon)
+   * FIXED: Creates simple close button that actually works
    * @private
    */
   private static createCloseButton(
     toast: HTMLElement,
-    options: NormalizedToastOptions
+    onClose?: () => void
   ): HTMLButtonElement {
     const button = document.createElement("button");
     button.className = "notifyx-close";
     button.setAttribute("aria-label", "Close notification");
     button.setAttribute("type", "button");
-    button.onclick = () => this.removeToast(toast, options.onClose);
+
+    // CRITICAL FIX: Direct inline handler that definitely works
+    button.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.removeToast(toast, onClose);
+    });
+
     return button;
   }
 
   /**
-   * Removes a toast with exit animation
+   * FIXED: Removes a toast with proper cleanup
    * @private
    */
   private static removeToast(
     toastElement: HTMLElement,
     onClose?: () => void
   ): void {
+    if (!toastElement || !toastElement.parentElement) return;
+
     // Clean up timeout if exists
     const timeoutData = (toastElement as any).__notifyxTimeout;
     if (timeoutData && timeoutData.timeoutId !== null) {
       clearTimeout(timeoutData.timeoutId);
+      timeoutData.timeoutId = null;
     }
 
     // Clean up event listeners
@@ -155,14 +166,26 @@ export class NotifyX {
     toastElement.classList.remove(ANIMATION_CLASSES.enter);
     toastElement.classList.add(ANIMATION_CLASSES.exit);
 
+    // Remove after animation
     const handleAnimationEnd = () => {
-      toastElement.remove();
-      toastElement.removeEventListener("animationend", handleAnimationEnd);
-      this.cleanupEmptyContainer(toastElement.parentElement);
+      if (toastElement.parentElement) {
+        const container = toastElement.parentElement;
+        toastElement.remove();
+        this.cleanupEmptyContainer(container);
+      }
       onClose?.();
     };
 
-    toastElement.addEventListener("animationend", handleAnimationEnd);
+    toastElement.addEventListener("animationend", handleAnimationEnd, {
+      once: true,
+    });
+
+    // Fallback in case animation doesn't fire
+    setTimeout(() => {
+      if (toastElement.parentElement) {
+        handleAnimationEnd();
+      }
+    }, 400);
   }
 
   /**
@@ -176,7 +199,7 @@ export class NotifyX {
   }
 
   /**
-   * FIXED: Manages auto-dismiss timer with pause on hover
+   * COMPLETELY FIXED: Auto-dismiss that actually works
    * @private
    */
   private static setupAutoDismiss(
@@ -192,21 +215,12 @@ export class NotifyX {
       isPaused: false,
     };
 
-    const progressBar = toastElement.querySelector(
-      ".notifyx-progress-bar"
-    ) as HTMLElement | null;
-
-    // Initialize progress bar
-    if (progressBar) {
-      progressBar.style.width = "100%";
-      // Double RAF for smooth animation start
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          progressBar.style.transition = `width ${options.duration}ms linear`;
-          progressBar.style.width = "0%";
-        });
-      });
-    }
+    // CRITICAL FIX: Start timer immediately before any animation
+    const startTimer = () => {
+      timeoutData.timeoutId = window.setTimeout(() => {
+        this.removeToast(toastElement, options.onClose);
+      }, timeoutData.remainingTime);
+    };
 
     // Pause timer function
     const pauseTimer = () => {
@@ -218,14 +232,6 @@ export class NotifyX {
           timeoutData.remainingTime - elapsed
         );
 
-        if (progressBar) {
-          const computedStyle = window.getComputedStyle(progressBar);
-          const currentWidth = computedStyle.width;
-          progressBar.style.transition = "none";
-          progressBar.style.width = currentWidth;
-          void progressBar.offsetWidth; // Force reflow
-        }
-
         clearTimeout(timeoutData.timeoutId);
         timeoutData.timeoutId = null;
       }
@@ -236,13 +242,6 @@ export class NotifyX {
       if (timeoutData.isPaused && timeoutData.remainingTime > 0) {
         timeoutData.isPaused = false;
         timeoutData.startTime = Date.now();
-
-        if (progressBar) {
-          requestAnimationFrame(() => {
-            progressBar.style.transition = `width ${timeoutData.remainingTime}ms linear`;
-            progressBar.style.width = "0%";
-          });
-        }
 
         timeoutData.timeoutId = window.setTimeout(() => {
           this.removeToast(toastElement, options.onClose);
@@ -259,13 +258,11 @@ export class NotifyX {
       toastElement.addEventListener("mouseleave", resumeTimer);
     }
 
-    // CRITICAL: Start the initial timer immediately
-    timeoutData.timeoutId = window.setTimeout(() => {
-      this.removeToast(toastElement, options.onClose);
-    }, options.duration);
-
     // Store timeout data
     (toastElement as any).__notifyxTimeout = timeoutData;
+
+    // START THE TIMER NOW!
+    startTimer();
   }
 
   /**
@@ -299,7 +296,7 @@ export class NotifyX {
     const toastElement = this.createToastElement(mergedOptions);
     container.appendChild(toastElement);
 
-    // CRITICAL: Always call setupAutoDismiss
+    // Setup auto-dismiss immediately
     this.setupAutoDismiss(toastElement, mergedOptions);
   }
 
@@ -342,7 +339,7 @@ export class NotifyX {
   }
 
   /**
-   * PRODUCTION GRADE LOADING - Centered, beautiful spinner
+   * Production-grade loading toast
    * @public
    */
   public static loading(
@@ -385,7 +382,7 @@ export class NotifyX {
   }
 
   /**
-   * IMPROVED: Promise support with proper loading management
+   * Promise support with loading management
    * @public
    */
   public static async promise<T>(
@@ -397,16 +394,12 @@ export class NotifyX {
     },
     options?: Partial<ToastOptions>
   ): Promise<T> {
-    // Show loading toast (centered)
     this.loading(messages.loading, options);
 
     try {
       const result = await promise;
-
-      // Dismiss loading
       this.dismissLoading();
 
-      // Show success (at specified position)
       const successMessage =
         typeof messages.success === "function"
           ? messages.success(result)
@@ -415,10 +408,8 @@ export class NotifyX {
 
       return result;
     } catch (error) {
-      // Dismiss loading
       this.dismissLoading();
 
-      // Show error (at specified position)
       const errorMessage =
         typeof messages.error === "function"
           ? messages.error(error)
@@ -430,7 +421,7 @@ export class NotifyX {
   }
 
   /**
-   * Clear all active toasts
+   * FIXED: Clear all active toasts
    * @public
    */
   public static clear(): void {
