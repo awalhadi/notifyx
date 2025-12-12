@@ -11,6 +11,9 @@
   --animate-slide-in: slide-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-slide-out: slide-out 0.3s cubic-bezier(0.4, 0, 1, 1);
 
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-fade-out: fade-out 0.3s ease-out;
+
   /* Color system for theming */
   --notifyx-success-from: #10b981;
   --notifyx-success-to: #059669;
@@ -132,6 +135,28 @@
       opacity: 1;
     }
   }
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes fade-out {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
 }
 
 @layer components {
@@ -178,7 +203,7 @@
   /* Toast base - ultra premium */
   .notifyx {
     position: relative;
-    min-width: clamp(320px, 90vw, 420px);
+    min-width: clamp(320px, 0vw, 420px);
     max-width: 100%;
     overflow: hidden;
     border-radius: 16px;
@@ -232,15 +257,23 @@
   /* Content wrapper - PROPER VERTICAL ALIGNMENT */
   .notifyx-content {
     @apply flex items-center gap-3 relative z-20;
-    padding: clamp(16px, 4vw, 20px) !important;
+    padding: clamp(8px, 2vw, 12px) !important;
+    justify-content: space-between;
+  }
+
+  .notifyx-content-and-icon{
+    @apply flex items-center gap-3;
   }
 
   /* Icon system - aligned to center */
   .notifyx-icon {
     @apply flex-shrink-0 rounded-2xl flex items-center justify-center relative;
-    width: clamp(22px, 10vw, 26px);
+    /* width: clamp(22px, 10vw, 26px);
     height: clamp(22px, 10vw, 26px);
-    font-size: clamp(17px, 5vw, 17px);
+    font-size: clamp(17px, 5vw, 17px); */
+    width: clamp(17px, 7vw, 22px);
+    height: clamp(17px, 7vw, 22px);
+    font-size: clamp(16px, 5vw, 16px);
     font-weight: 600;
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     
@@ -462,8 +495,9 @@
     line-height: 1;
     color: currentColor;
     opacity: 0.5;
-    transition: all 0.2s ease;
+    transition: all 0.2s ease !important;
     margin-left: auto;
+    box-shadow: unset !important;
   }
 
   .notifyx-close::before {
@@ -471,24 +505,25 @@
   }
 
   .notifyx-close:hover {
-    opacity: 1;
-    transform: scale(1.2) rotate(90deg);
+    opacity: 1 !important;
+    transform: scale(1.2) rotate(90deg) !important;
   }
 
   .notifyx-close:active {
-    transform: scale(0.9) rotate(90deg);
+    transform: scale(0.9) rotate(90deg) !important;
   }
 
   /* Message text - properly aligned center */
   .notifyx-msg {
-    @apply flex-1;
-    font-size: clamp(14px, 3.5vw, 15px);
-    font-weight: 500;
-    line-height: 1.6;
-    letter-spacing: -0.01em;
-    color: inherit;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+    /* @apply flex-1; */
+    font-size: clamp(12px, 2.5vw, 14px) !important;
+    font-weight: 500 !important;
+    /* line-height: 1.6 !important; */
+    line-height: 1.2 !important;
+    letter-spacing: -0.01em !important;
+    color: inherit !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
     display: flex;
     align-items: center;
   }
@@ -625,7 +660,8 @@
     }
 
     .notifyx-content {
-      padding: 14px;
+      /* padding: 14px; */
+      padding: 8px;
       gap: 12px;
     }
 
@@ -658,7 +694,8 @@
     }
 
     .notifyx-content {
-      padding: 12px;
+      padding: 7px;
+      /* padding: 12px; */
       gap: 10px;
     }
 

@@ -31,8 +31,8 @@ const getContainer = (position) => {
 };
 
 const ANIMATION_CLASSES = {
-  enter: "notifyx-enter",
-  exit: "notifyx-exit",
+  enter: "notifyx-spring-enter",
+  exit: "notifyx-spring-exit",
   slideEnter: "notifyx-slide-enter",
   slideExit: "notifyx-slide-exit"
 };
@@ -83,22 +83,25 @@ class NotifyX {
     toast.setAttribute("aria-atomic", "true");
     const contentWrapper = document.createElement("div");
     contentWrapper.className = "notifyx-content";
+    const contentAndIconWrapper = document.createElement("div");
+    contentAndIconWrapper.className = "notifyx-content-and-icon";
     if (options.showIcon) {
       const icon = document.createElement("div");
       icon.className = "notifyx-icon";
       icon.textContent = options.icon || TOAST_ICONS[options.type];
       icon.setAttribute("aria-hidden", "true");
-      contentWrapper.appendChild(icon);
+      contentAndIconWrapper.appendChild(icon);
     }
     const message = document.createElement("span");
     message.className = "notifyx-msg";
     message.textContent = options.message;
-    contentWrapper.appendChild(message);
+    contentAndIconWrapper.appendChild(message);
+    contentWrapper.appendChild(contentAndIconWrapper);
     if (options.dismissible) {
       contentWrapper.appendChild(this.createCloseButton(toast, options));
     }
     toast.appendChild(contentWrapper);
-    if (options.showProgress && options.duration && options.duration > 0) {
+    if (options.showProgress && options?.duration && options?.duration > 0) {
       const progressBar = document.createElement("div");
       progressBar.className = "notifyx-progress-bar";
       toast.appendChild(progressBar);
@@ -147,22 +150,51 @@ class NotifyX {
    * @private
    */
   static removeToast(toastElement, onClose) {
-    const timeoutData = toastElement.__notifyxTimeout;
+    if (toastElement.hasAttribute("data-removing")) {
+      return;
+    }
+    toastElement.setAttribute("data-removing", "true");
+    const timeoutData = toastElement?.__notifyxTimeout;
+    console.log("toastElement:", toastElement, "timeoutData:", timeoutData);
     if (timeoutData && timeoutData.timeoutId !== null) {
       clearTimeout(timeoutData.timeoutId);
+      timeoutData.timeoutId = null;
     }
     const pauseTimer = toastElement.__notifyxPauseTimer;
     const resumeTimer = toastElement.__notifyxResumeTimer;
-    if (pauseTimer) toastElement.removeEventListener("mouseenter", pauseTimer);
-    if (resumeTimer)
+    if (pauseTimer) {
+      toastElement.removeEventListener("mouseenter", pauseTimer);
+    }
+    if (resumeTimer) {
       toastElement.removeEventListener("mouseleave", resumeTimer);
-    toastElement.classList.remove(ANIMATION_CLASSES.enter);
-    toastElement.classList.add(ANIMATION_CLASSES.exit);
-    const handleAnimationEnd = () => {
-      toastElement.remove();
-      toastElement.removeEventListener("animationend", handleAnimationEnd);
+    }
+    delete toastElement.__notifyxTimeout;
+    delete toastElement.__notifyxPauseTimer;
+    delete toastElement.__notifyxResumeTimer;
+    const performCleanup = () => {
+      if (toastElement.isConnected) {
+        toastElement.remove();
+      }
       this.cleanupEmptyContainer(toastElement.parentElement);
       onClose?.();
+    };
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReducedMotion) {
+      performCleanup();
+      return;
+    }
+    toastElement.classList.remove(ANIMATION_CLASSES.enter);
+    toastElement.classList.add(ANIMATION_CLASSES.exit);
+    const fallbackTimeout = window.setTimeout(() => {
+      performCleanup();
+    }, 400);
+    const handleAnimationEnd = (event) => {
+      if (event.target !== toastElement) return;
+      clearTimeout(fallbackTimeout);
+      toastElement.removeEventListener("animationend", handleAnimationEnd);
+      performCleanup();
     };
     toastElement.addEventListener("animationend", handleAnimationEnd);
   }
@@ -366,6 +398,16 @@ class NotifyX {
       });
     });
     activeLoadingToast = null;
+  }
+  /**
+   * Clear a specific toast by its element
+   * @param toastElement - The toast element to remove
+   * @public
+   */
+  static dismiss(toastElement) {
+    if (toastElement && toastElement.classList.contains("notifyx")) {
+      this.removeToast(toastElement);
+    }
   }
 }
 if (typeof window !== "undefined") {

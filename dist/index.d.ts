@@ -3,8 +3,8 @@
  * @public
  */
 export declare const ANIMATION_CLASSES: {
-    readonly enter: "notifyx-enter";
-    readonly exit: "notifyx-exit";
+    readonly enter: "notifyx-spring-enter";
+    readonly exit: "notifyx-spring-exit";
     readonly slideEnter: "notifyx-slide-enter";
     readonly slideExit: "notifyx-slide-exit";
 };
@@ -113,6 +113,12 @@ declare class NotifyX {
      * @public
      */
     static clear(): void;
+    /**
+     * Clear a specific toast by its element
+     * @param toastElement - The toast element to remove
+     * @public
+     */
+    static dismiss(toastElement: HTMLElement): void;
 }
 export { NotifyX }
 export default NotifyX;
