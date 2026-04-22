@@ -19,14 +19,13 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^20.0.0",
-    "tailwindcss": "^4.1.11",
     "terser": "^5.37.0",
     "typescript": "^5.8.2",
     "vite": "^7.0.0",
     "vite-plugin-dts": "^4.0.0",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "description": "Lightweight toast notifications for React, Next.js, Vue, Angular, Svelte, and Vanilla JS. Beautiful Tailwind CSS styles, zero dependencies, and TypeScript types. Premium toast notifications with beautiful glassmorphism design. Lightweight (1.4KB), framework-agnostic, TypeScript support, promise-based API, and zero dependencies.",
+  "description": "AI-native toast notification library — premium glassmorphism design, 5 animations, streaming AI support, priority queue, zero dependencies, < 5KB gzipped.",
   "files": [
     "dist/*.js",
     "dist/*.css",
@@ -37,21 +36,20 @@
   "keywords": [
     "toast",
     "toast notifications",
-    "toast messages",
     "notification",
     "notify",
     "alert",
+    "ai notifications",
+    "llm toast",
+    "mcp notifications",
+    "streaming toast",
     "react toast",
     "nextjs toast",
     "vanilla js toast",
     "vue toast",
     "svelte toast",
     "angular toast",
-    "react-notifications",
     "notifyx",
-    "snackbar",
-    "message",
-    "typescript toast",
     "glassmorphism",
     "premium ui",
     "promise toast",
@@ -62,7 +60,8 @@
     "accessible",
     "aria",
     "dark mode",
-    "responsive"
+    "priority queue",
+    "web animations api"
   ],
   "homepage": "https://github.com/awalhadi/notifyx#readme",
   "repository": {
@@ -75,7 +74,7 @@
   "license": "MIT",
   "scripts": {
     "build": "vite build",
-    "build:css": "npx @tailwindcss/cli -i ./src/styles/toast.css -o ./dist/notifyx.min.css --minify",
+    "build:css": "node scripts/build-css.mjs",
     "build:all": "bun run build && bun run build:css",
     "verify": "bash scripts/verify-build.sh",
     "dev": "vite",

@@ -1,0 +1,131 @@
+/* AI Toast — distinct from info/success */
+.notifyx-ai {
+  color: #0f172a;
+  background: linear-gradient(
+    135deg,
+    rgba(248, 250, 255, 0.97) 0%,
+    rgba(237, 242, 255, 0.97) 50%,
+    rgba(224, 231, 255, 0.97) 100%
+  );
+  border-color: rgba(99, 102, 241, 0.35);
+  border-width: 1px;
+  /* Subtle animated border glow */
+  box-shadow:
+    0 0 0 1px rgba(99, 102, 241, 0.1),
+    0 10px 40px -10px rgba(99, 102, 241, 0.25),
+    0 20px 50px -15px rgba(99, 102, 241, 0.12),
+    inset 0 1px rgba(255, 255, 255, 0.8);
+}
+
+/* Pulsing border for streaming AI toasts */
+.notifyx-ai[data-streaming="true"] {
+  animation: notifyx-ai-border-pulse 2s ease-in-out infinite;
+}
+@keyframes notifyx-ai-border-pulse {
+  0%, 100% { border-color: rgba(99, 102, 241, 0.3); }
+  50%       { border-color: rgba(99, 102, 241, 0.7); }
+}
+
+.notifyx-ai .notifyx-icon {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #fff;
+  /* AI sparkle icon */
+  font-size: 14px;
+}
+
+/* AI metadata bar — shows model, tokens, latency */
+.notifyx-ai-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(99, 102, 241, 0.12);
+  font-size: 10px;
+  opacity: 0.6;
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.02em;
+}
+.notifyx-ai-meta-badge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* Loading toast — three-dot animation */
+.notifyx-loading {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+  border-color: rgba(148, 163, 184, 0.4);
+  color: #334155;
+}
+.notifyx-loading .notifyx-icon {
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+  color: #fff;
+}
+
+/* AI thinking dots */
+.notifyx-ai-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 4px;
+}
+.notifyx-ai-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: notifyx-ai-thinking 1.2s ease-in-out infinite both;
+}
+.notifyx-ai-dots span:nth-child(1) { animation-delay: 0s; }
+.notifyx-ai-dots span:nth-child(2) { animation-delay: 0.2s; }
+.notifyx-ai-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* Streaming cursor blink */
+.notifyx-stream-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: currentColor;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  animation: notifyx-stream-pulse 0.7s step-end infinite;
+}
+
+/* Action buttons */
+.notifyx-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+.notifyx-action-btn {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  letter-spacing: 0.01em;
+}
+.notifyx-action-btn-primary {
+  background: currentColor;
+  color: #fff;
+  border-color: currentColor;
+}
+.notifyx-action-btn-ghost {
+  background: transparent;
+  color: inherit;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+.notifyx-action-btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+.notifyx-action-btn-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.25);
+}

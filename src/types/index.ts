@@ -1,71 +1,112 @@
-import type { Position } from "../constants/positions";
+export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'loading' | 'ai' | 'default';
 
-export type { Position } from "../constants/positions";
+export type Position =
+  | 'top-right' | 'top-left' | 'top-center'
+  | 'bottom-right' | 'bottom-left' | 'bottom-center'
+  | 'center';
 
-/**
- * Toast notification types
- * @public
- */
-export type ToastType = "success" | "error" | "warning" | "info" | "default";
+export type AnimationPreset = 'spring' | 'slide' | 'bloom' | 'flip' | 'fade' | 'none';
 
-/**
- * Toast notification configuration options
- * @public
- */
-export interface ToastOptions {
-  /** The message to display in the toast */
-  message: string;
+export type ToastPriority = 'low' | 'normal' | 'high' | 'critical';
 
-  /** Type of toast notification */
-  type?: ToastType;
+export type ThemePreset = 'auto' | 'light' | 'dark' | 'glass' | 'minimal' | 'brutal';
 
-  /** Duration in milliseconds (0 = persistent, stays until manually dismissed) */
-  duration?: number;
-
-  /** Position on screen */
-  position?: Position;
-
-  /** Whether the toast can be manually dismissed */
-  dismissible?: boolean;
-
-  /** Show a progress bar indicating remaining time */
-  showProgress?: boolean;
-
-  /** Show icon based on toast type */
-  showIcon?: boolean;
-
-  /** Custom icon to display (overrides default type icon) */
-  icon?: string;
-
-  /** Pause auto-dismiss timer on hover */
-  pauseOnHover?: boolean;
-
-  /** Callback fired when toast is closed */
-  onClose?: () => void;
-
-  /** Maximum number of toasts to show simultaneously */
-  maxToasts?: number;
+export interface ToastAction {
+  label: string;
+  onClick: (toastId: string) => void;
+  variant?: 'primary' | 'ghost' | 'danger';
 }
 
-/**
- * Normalized toast options with all required fields
- * @internal
- */
-export type NormalizedToastOptions = Required<Omit<ToastOptions, "icon">> & {
-  icon?: string;
+export interface AIMetadata {
+  model?: string;          // e.g. "claude-3-5-sonnet"
+  toolName?: string;       // MCP tool name
+  confidence?: number;     // 0–1
+  streaming?: boolean;     // is this a streaming update?
+  tokens?: number;         // token count to display
+  latencyMs?: number;      // response time
+}
+
+export interface ToastOptions {
+  // Core
+  message: string;
+  title?: string;              // NEW: title above message
+  type?: ToastType;
+  position?: Position;
+  duration?: number;           // 0 = persistent
+  dismissible?: boolean;
+  
+  // NEW options
+  animation?: AnimationPreset;
+  theme?: ThemePreset;
+  priority?: ToastPriority;    // affects queue order
+  id?: string;                 // custom ID for updates
+  
+  // Rich content
+  actions?: ToastAction[];     // action buttons
+  icon?: string | HTMLElement; // custom icon (emoji or element)
+  richHtml?: string;           // sanitized HTML body
+  
+  // AI-specific
+  ai?: AIMetadata;
+  
+  // Behavior
+  pauseOnHover?: boolean;      // pause countdown on hover
+  pauseOnFocus?: boolean;      // pause when window loses focus
+  onClose?: (id: string) => void;
+  onClick?: (id: string) => void;
+  
+  // Internal
+  maxToasts?: number;
+  showProgress?: boolean;
+  showIcon?: boolean;
+  className?: string;
+}
+
+export type NormalizedToastOptions = Required<
+  Omit<ToastOptions, "icon" | "title" | "actions" | "id" | "className" | "onClick" | "onClose" | "ai" | "richHtml">
+> & {
+  icon?: string | HTMLElement;
+  title?: string;
+  actions?: ToastAction[];
+  id?: string;
+  className?: string;
+  onClick?: (id: string) => void;
+  onClose?: (id: string) => void;
+  ai?: AIMetadata;
+  richHtml?: string;
 };
 
-/**
- * Promise-based toast messages configuration
- * @public
- */
-export interface PromiseMessages<T = any> {
-  /** Message to show while promise is pending */
-  loading: string;
+export interface PromiseOptions<T> {
+  loading: string | { title?: string; message: string };
+  success: string | ((data: T) => string) | { title?: string; message: string | ((data: T) => string) };
+  error: string | ((err: unknown) => string) | { title?: string; message: string | ((err: unknown) => string) };
+  position?: Position;
+  animation?: AnimationPreset;
+  id?: string;
+}
 
-  /** Message to show when promise resolves (can be a function receiving the result) */
-  success: string | ((data: T) => string);
+export interface StreamOptions {
+  position?: Position;
+  animation?: AnimationPreset;
+  id?: string;
+  title?: string;
+  ai?: AIMetadata;
+  onComplete?: (finalMessage: string) => void;
+  onChunk?: (chunk: string, accumulated: string) => void;
+  loadingMessage?: string;
+}
 
-  /** Message to show when promise rejects (can be a function receiving the error) */
-  error: string | ((error: any) => string);
+export interface StreamController {
+  update: (chunk: string) => void;  // append text chunk
+  set: (message: string) => void;   // replace full message
+  success: (message: string, options?: Partial<ToastOptions>) => void;
+  error: (message: string, options?: Partial<ToastOptions>) => void;
+  dismiss: () => void;
+}
+
+export interface QueueEntry {
+  options: NormalizedToastOptions;
+  priority: number;
+  timestamp: number;
+  id: string;
 }

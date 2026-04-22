@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="../dist/notifyx.min.css" />
+  <script src="../dist/notifyx.min.js"></script>
+</head>
+<body>
+  <div id="status">Waiting...</div>
+  <script>
+    try {
+      if (typeof window.NotifyX !== 'undefined') {
+        document.getElementById('status').innerText = 'NotifyX exists on window! Type: ' + typeof window.NotifyX;
+        if (window.NotifyX.success) {
+           document.getElementById('status').innerText += '\nMethods are present!';
+           window.NotifyX.success('It works from UMD!');
+        }
+      } else {
+        document.getElementById('status').innerText = 'NotifyX NOT FOUND on window!';
+      }
+    } catch (err) {
+      document.getElementById('status').innerText = 'Error: ' + err.message;
+    }
+  </script>
+</body>
+</html>
