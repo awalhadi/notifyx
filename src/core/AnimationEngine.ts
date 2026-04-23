@@ -1,24 +1,9 @@
 import type { AnimationPreset } from "../types";
 
-/** Enter class per animation style */
-const ENTER_CLASS: Record<AnimationPreset, string> = {
-  spring: "nx-spring-enter",
-  slide:  "nx-slide-enter",
-  fade:   "nx-fade-enter",
-  flip:   "nx-flip-enter",
-  bloom:  "nx-bloom-enter",
-  none:   "",
-};
-
-/** Exit class per animation style */
-const EXIT_CLASS: Record<AnimationPreset, string> = {
-  spring: "nx-spring-exit",
-  slide:  "nx-slide-exit",
-  fade:   "nx-fade-exit",
-  flip:   "nx-flip-exit",
-  bloom:  "nx-bloom-exit",
-  none:   "",
-};
+/**
+ * AnimationEngine — centralises all animation logic.
+ * @public
+ */
 
 /** Exit duration (ms) per style — used for fallback timeout */
 const EXIT_DURATION: Record<AnimationPreset, number> = {
@@ -46,11 +31,11 @@ export class AnimationEngine {
     style: AnimationPreset = "spring",
     _position?: string
   ): void {
-    if (this.prefersReducedMotion()) {
+    if (this.prefersReducedMotion() || style === "none") {
       el.style.opacity = "1";
       return;
     }
-    el.classList.add(ENTER_CLASS[style]);
+    el.classList.add("notifyx-entering");
   }
 
   /**
@@ -62,16 +47,15 @@ export class AnimationEngine {
     _position?: string
   ): Promise<void> {
     return new Promise((resolve) => {
-      if (this.prefersReducedMotion()) {
+      if (this.prefersReducedMotion() || style === "none") {
         resolve();
         return;
       }
 
-      const exitClass = EXIT_CLASS[style];
       const duration  = EXIT_DURATION[style];
 
-      el.classList.remove(ENTER_CLASS[style]);
-      el.classList.add(exitClass);
+      el.classList.remove("notifyx-entering");
+      el.classList.add("notifyx-exiting");
 
       const fallback = setTimeout(resolve, duration + 60);
 

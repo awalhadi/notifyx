@@ -3,7 +3,7 @@
   "version": "3.0.0",
   "author": "A Awal Hadi",
   "type": "module",
-  "main": "dist/notifyx.min.js",
+  "main": "dist/notifyx.cjs",
   "module": "dist/notifyx.es.js",
   "types": "./dist/index.d.ts",
   "style": "dist/notifyx.min.css",
@@ -11,7 +11,7 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/notifyx.es.js",
-      "require": "./dist/notifyx.min.js",
+      "require": "./dist/notifyx.cjs",
       "default": "./dist/notifyx.es.js"
     },
     "./style.css": "./dist/notifyx.min.css"

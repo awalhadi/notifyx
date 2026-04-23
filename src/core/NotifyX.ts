@@ -119,6 +119,8 @@ export default class NotifyX {
     if (opts.theme && opts.theme !== "auto") {
       toast.setAttribute("data-notifyx-theme", opts.theme);
     }
+    if (opts.position) toast.setAttribute("data-position", opts.position);
+    if (opts.animation) toast.setAttribute("data-animation", opts.animation);
 
     if (opts.onClick) {
       toast.style.cursor = "pointer";

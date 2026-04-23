@@ -68,22 +68,6 @@ const DEFAULT_OPTIONS = {
   priority: "normal"
 };
 
-const ENTER_CLASS = {
-  spring: "nx-spring-enter",
-  slide: "nx-slide-enter",
-  fade: "nx-fade-enter",
-  flip: "nx-flip-enter",
-  bloom: "nx-bloom-enter",
-  none: ""
-};
-const EXIT_CLASS = {
-  spring: "nx-spring-exit",
-  slide: "nx-slide-exit",
-  fade: "nx-fade-exit",
-  flip: "nx-flip-exit",
-  bloom: "nx-bloom-exit",
-  none: ""
-};
 const EXIT_DURATION = {
   spring: 420,
   slide: 320,
@@ -101,25 +85,24 @@ class AnimationEngine {
    * Accepts optional position/theme args (currently unused — reserved for slide direction override).
    */
   static enter(el, style = "spring", _position) {
-    if (this.prefersReducedMotion()) {
+    if (this.prefersReducedMotion() || style === "none") {
       el.style.opacity = "1";
       return;
     }
-    el.classList.add(ENTER_CLASS[style]);
+    el.classList.add("notifyx-entering");
   }
   /**
    * Apply the exit animation and return a Promise that resolves when done.
    */
   static exit(el, style = "spring", _position) {
     return new Promise((resolve) => {
-      if (this.prefersReducedMotion()) {
+      if (this.prefersReducedMotion() || style === "none") {
         resolve();
         return;
       }
-      const exitClass = EXIT_CLASS[style];
       const duration = EXIT_DURATION[style];
-      el.classList.remove(ENTER_CLASS[style]);
-      el.classList.add(exitClass);
+      el.classList.remove("notifyx-entering");
+      el.classList.add("notifyx-exiting");
       const fallback = setTimeout(resolve, duration + 60);
       const handler = (e) => {
         if (e.target !== el) return;
@@ -455,6 +438,8 @@ class NotifyX {
     if (opts.theme && opts.theme !== "auto") {
       toast.setAttribute("data-notifyx-theme", opts.theme);
     }
+    if (opts.position) toast.setAttribute("data-position", opts.position);
+    if (opts.animation) toast.setAttribute("data-animation", opts.animation);
     if (opts.onClick) {
       toast.style.cursor = "pointer";
       toast.addEventListener("click", (e) => {

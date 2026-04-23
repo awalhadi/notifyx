@@ -23,9 +23,10 @@ export default defineConfig({
       name: "NotifyX",
       fileName: (format) => {
         if(format === 'umd') return 'notifyx.min.js';
+        if(format === 'cjs') return 'notifyx.cjs';
         return `notifyx.${format}.js`;
       },
-      formats: ["es", "umd"]
+      formats: ["es", "umd", "cjs"]
     },
     rollupOptions: {
       external: [],
