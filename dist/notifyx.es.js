@@ -68,305 +68,6 @@ const DEFAULT_OPTIONS = {
   priority: "normal"
 };
 
-const EXIT_DURATION = {
-  spring: 420,
-  slide: 320,
-  fade: 240,
-  flip: 330,
-  bloom: 280,
-  none: 0
-};
-class AnimationEngine {
-  static prefersReducedMotion() {
-    return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }
-  /**
-   * Apply the enter animation to a toast element.
-   * Accepts optional position/theme args (currently unused — reserved for slide direction override).
-   */
-  static enter(el, style = "spring", _position) {
-    if (this.prefersReducedMotion() || style === "none") {
-      el.style.opacity = "1";
-      return;
-    }
-    el.classList.add("notifyx-entering");
-  }
-  /**
-   * Apply the exit animation and return a Promise that resolves when done.
-   */
-  static exit(el, style = "spring", _position) {
-    return new Promise((resolve) => {
-      if (this.prefersReducedMotion() || style === "none") {
-        resolve();
-        return;
-      }
-      const duration = EXIT_DURATION[style];
-      el.classList.remove("notifyx-entering");
-      el.classList.add("notifyx-exiting");
-      const fallback = setTimeout(resolve, duration + 60);
-      const handler = (e) => {
-        if (e.target !== el) return;
-        clearTimeout(fallback);
-        el.removeEventListener("animationend", handler);
-        resolve();
-      };
-      el.addEventListener("animationend", handler);
-    });
-  }
-  /**
-   * Brief attention-shake animation (used for critical priority toasts).
-   */
-  static shake(el) {
-    if (this.prefersReducedMotion()) return;
-    el.classList.remove("nx-pulse-attention");
-    void el.offsetWidth;
-    el.classList.add("nx-pulse-attention");
-    el.addEventListener(
-      "animationend",
-      () => el.classList.remove("nx-pulse-attention"),
-      { once: true }
-    );
-  }
-  /**
-   * Pulse attention on an existing toast (e.g. dedup hit).
-   */
-  static pulse(el) {
-    this.shake(el);
-  }
-  /**
-   * Post-stream celebratory shimmer.
-   */
-  static shimmerHighlight(el) {
-    if (this.prefersReducedMotion()) return;
-    el.classList.add("nx-shimmer-highlight");
-    el.addEventListener(
-      "animationend",
-      () => el.classList.remove("nx-shimmer-highlight"),
-      { once: true }
-    );
-  }
-  /**
-   * Stagger entrance of multiple elements (e.g. queue flush).
-   */
-  static staggerEnter(elements, style = "spring", delayMs = 80) {
-    elements.forEach((el, i) => setTimeout(() => this.enter(el, style), i * delayMs));
-  }
-}
-
-const PRIORITY_WEIGHT = {
-  critical: 4,
-  high: 3,
-  normal: 2,
-  low: 1
-};
-class ToastQueue {
-  constructor(maxSize = 50) {
-    this.heap = [];
-    this.maxSize = maxSize;
-  }
-  /** Current queue depth */
-  get size() {
-    return this.heap.length;
-  }
-  /** True when no queued items remain */
-  get isEmpty() {
-    return this.heap.length === 0;
-  }
-  /**
-   * Enqueue a toast entry.
-   * Drops oldest low-priority item if at capacity.
-   */
-  enqueue(options) {
-    const id = options.id ?? this.generateId();
-    const entry = {
-      options: { ...options, id },
-      priority: PRIORITY_WEIGHT[options.priority ?? "normal"],
-      timestamp: Date.now(),
-      id
-    };
-    if (this.heap.length >= this.maxSize) {
-      const lowestIdx = this.findLowestPriorityIndex();
-      if (this.heap[lowestIdx].priority >= entry.priority) {
-        return id;
-      }
-      this.heap.splice(lowestIdx, 1);
-    }
-    this.heap.push(entry);
-    this.bubbleUp(this.heap.length - 1);
-    return id;
-  }
-  /** Dequeue the highest-priority entry */
-  dequeue() {
-    if (this.heap.length === 0) return void 0;
-    if (this.heap.length === 1) return this.heap.pop();
-    const top = this.heap[0];
-    this.heap[0] = this.heap.pop();
-    this.sinkDown(0);
-    return top;
-  }
-  /** Peek without removing */
-  peek() {
-    return this.heap[0];
-  }
-  /** Remove a specific entry by id */
-  remove(id) {
-    const idx = this.heap.findIndex((e) => e.id === id);
-    if (idx === -1) return false;
-    if (idx === this.heap.length - 1) {
-      this.heap.pop();
-    } else {
-      this.heap[idx] = this.heap.pop();
-      this.bubbleUp(idx);
-      this.sinkDown(idx);
-    }
-    return true;
-  }
-  /** Clear entire queue */
-  clear() {
-    this.heap = [];
-  }
-  // ─── Heap internals ────────────────────────────────────────────────
-  bubbleUp(idx) {
-    while (idx > 0) {
-      const parent = Math.floor((idx - 1) / 2);
-      if (this.compare(this.heap[idx], this.heap[parent]) > 0) {
-        [this.heap[idx], this.heap[parent]] = [this.heap[parent], this.heap[idx]];
-        idx = parent;
-      } else break;
-    }
-  }
-  sinkDown(idx) {
-    const n = this.heap.length;
-    while (true) {
-      let largest = idx;
-      const l = 2 * idx + 1;
-      const r = 2 * idx + 2;
-      if (l < n && this.compare(this.heap[l], this.heap[largest]) > 0) largest = l;
-      if (r < n && this.compare(this.heap[r], this.heap[largest]) > 0) largest = r;
-      if (largest === idx) break;
-      [this.heap[idx], this.heap[largest]] = [this.heap[largest], this.heap[idx]];
-      idx = largest;
-    }
-  }
-  /** Higher priority wins; ties go to earlier timestamp */
-  compare(a, b) {
-    if (a.priority !== b.priority) return a.priority - b.priority;
-    return b.timestamp - a.timestamp;
-  }
-  findLowestPriorityIndex() {
-    let idx = 0;
-    for (let i = 1; i < this.heap.length; i++) {
-      if (this.compare(this.heap[i], this.heap[idx]) < 0) idx = i;
-    }
-    return idx;
-  }
-  generateId() {
-    return `nx-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
-  }
-}
-
-class StreamBridge {
-  /**
-   * Yields decoded string chunks from a fetch() ReadableStream<Uint8Array>.
-   */
-  static async *fromUint8Stream(stream, parseChunk) {
-    const reader = stream.getReader();
-    const decoder = new TextDecoder();
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const raw = decoder.decode(value, { stream: true });
-        yield parseChunk ? parseChunk(raw) : raw;
-      }
-      const tail = decoder.decode();
-      if (tail) yield parseChunk ? parseChunk(tail) : tail;
-    } finally {
-      reader.releaseLock();
-    }
-  }
-  /**
-   * Extracts text chunks from an AsyncIterable (OpenAI / Anthropic / custom).
-   * Uses a heuristic extractor that handles common LLM SDK chunk shapes.
-   */
-  static async *fromIterable(source, extract) {
-    for await (const chunk of source) {
-      const text = extract ? extract(chunk) : StreamBridge.extractText(chunk);
-      if (text) yield text;
-    }
-  }
-  /**
-   * Yields characters from a plain string with a delay (for demos / testing).
-   */
-  static async *fakeStream(text, chunkSize = 3, delayMs = 28) {
-    for (let i = 0; i < text.length; i += chunkSize) {
-      yield text.slice(i, i + chunkSize);
-      await new Promise((r) => setTimeout(r, delayMs));
-    }
-  }
-  /**
-   * Pipes any supported source into a DOM element's textContent,
-   * appending each chunk. Returns the full accumulated text.
-   *
-   * Supported sources:
-   *   - string (immediate)
-   *   - Promise<string>
-   *   - AsyncIterable<T>
-   *   - ReadableStream<Uint8Array>  (fetch body)
-   *   - ReadableStream<string>
-   */
-  static async pipe(source, target, onChunk) {
-    let full = "";
-    const append = (chunk) => {
-      full += chunk;
-      target.textContent = full;
-      onChunk?.(chunk, full);
-    };
-    if (typeof source === "string") {
-      append(source);
-    } else if (source instanceof Promise) {
-      append(await source);
-    } else if (source instanceof ReadableStream) {
-      const reader = source.getReader();
-      const first = await reader.read();
-      if (first.done) return full;
-      if (first.value instanceof Uint8Array) {
-        reader.releaseLock();
-        for await (const chunk of this.fromUint8Stream(source)) {
-          append(chunk);
-        }
-      } else {
-        append(first.value);
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          append(value);
-        }
-        reader.releaseLock();
-      }
-    } else if (Symbol.asyncIterator in source) {
-      for await (const chunk of source) {
-        const text = this.extractText(chunk);
-        if (text) append(text);
-      }
-    }
-    return full;
-  }
-  /**
-   * Heuristic text extractor — handles common LLM SDK chunk shapes.
-   */
-  static extractText(chunk) {
-    if (typeof chunk === "string") return chunk;
-    if (!chunk || typeof chunk !== "object") return "";
-    const c = chunk;
-    if (c?.choices?.[0]?.delta?.content) return c.choices[0].delta.content;
-    if (c?.delta?.text) return c.delta.text;
-    if (typeof c?.text === "string") return c.text;
-    if (typeof c?.content === "string") return c.content;
-    return "";
-  }
-}
-
 const SVG_ICONS = {
   success: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 10.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   error: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M7 7l6 6M13 7l-6 6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`,
@@ -377,12 +78,31 @@ const SVG_ICONS = {
   ai: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10 2l2.4 5.6L18 10l-5.6 2.4L10 18l-2.4-5.6L2 10l5.6-2.4L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>`
 };
 let activeLoadingToast = null;
-const globalQueue = new ToastQueue(100);
 const activeToastIds = /* @__PURE__ */ new Map();
 let globalDefaults = {};
 let globalTheme = "auto";
 class NotifyX {
+  static {
+    this.POSITIONS = POSITIONS;
+  }
+  static {
+    this.ANIMATION_PRESETS = ANIMATION_PRESETS;
+  }
+  static {
+    this.THEMES = THEMES;
+  }
+  static {
+    this.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
+  }
   // ─── Element Builders ─────────────────────────────────────────────────────
+  /** @private */
+  static pulse(el) {
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    el.classList.remove("nx-pulse-attention");
+    void el.offsetWidth;
+    el.classList.add("nx-pulse-attention");
+    el.addEventListener("animationend", () => el.classList.remove("nx-pulse-attention"), { once: true });
+  }
   /** @private */
   static attachGestures(element, id) {
     let startX = 0;
@@ -479,6 +199,22 @@ class NotifyX {
       msg.appendChild(cursor);
     }
     textBlock.appendChild(msg);
+    if (opts.actions && opts.actions.length > 0) {
+      const actionsBar = document.createElement("div");
+      actionsBar.className = "notifyx-actions";
+      for (const action of opts.actions) {
+        const btn = document.createElement("button");
+        btn.className = `notifyx-action-btn notifyx-action-${action.variant ?? "ghost"}`;
+        btn.textContent = action.label;
+        btn.setAttribute("type", "button");
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          action.onClick(opts.id);
+        });
+        actionsBar.appendChild(btn);
+      }
+      textBlock.appendChild(actionsBar);
+    }
     row.appendChild(textBlock);
     contentWrapper.appendChild(row);
     if (opts.dismissible) {
@@ -527,22 +263,6 @@ class NotifyX {
       }
     }
     toast.appendChild(contentWrapper);
-    if (opts.actions && opts.actions.length > 0) {
-      const actionsBar = document.createElement("div");
-      actionsBar.className = "notifyx-actions";
-      for (const action of opts.actions) {
-        const btn = document.createElement("button");
-        btn.className = `notifyx-action-btn notifyx-action-btn-${action.variant ?? "ghost"}`;
-        btn.textContent = action.label;
-        btn.setAttribute("type", "button");
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          action.onClick(opts.id);
-        });
-        actionsBar.appendChild(btn);
-      }
-      toast.appendChild(actionsBar);
-    }
     if (opts.showProgress && opts.duration > 0) {
       const bar = document.createElement("div");
       bar.className = "notifyx-progress-bar";
@@ -590,10 +310,16 @@ class NotifyX {
     delete el.__notifyxPauseTimer;
     delete el.__notifyxResumeTimer;
     if (opts.id) activeToastIds.delete(opts.id);
-    await AnimationEngine.exit(el, opts.animation ?? "spring", opts.position);
-    if (el.isConnected) el.remove();
-    if (el.parentElement?.childNodes.length === 0) el.parentElement.remove();
-    opts.onClose?.(opts.id);
+    el.style.opacity = "0";
+    el.style.transform = `translateY(${el.style.transform.includes("translateY") ? el.style.transform.split("translateY(")[1].split(")")[0] : "0px"}) scale(0.9)`;
+    if (el.parentElement) {
+      this.updateStackLayout(el.parentElement, el.parentElement.getAttribute("data-position") || "bottom-right");
+    }
+    setTimeout(() => {
+      if (el.isConnected) el.remove();
+      if (el.parentElement?.childNodes.length === 0) el.parentElement.remove();
+      opts.onClose?.(opts.id);
+    }, 400);
   }
   /** @private */
   static setupAutoDismiss(el, opts) {
@@ -644,6 +370,25 @@ class NotifyX {
     const toasts = container.querySelectorAll(".notifyx:not([data-removing])");
     if (toasts.length >= max) this.removeToast(toasts[0], {});
   }
+  /** @private */
+  static updateStackLayout(container, position) {
+    const toasts = Array.from(container.querySelectorAll(".notifyx:not([data-removing])"));
+    const isTop = position.includes("top");
+    toasts.forEach((el, idx) => {
+      const indexFromNewest = toasts.length - 1 - idx;
+      const scale = 1 - indexFromNewest * 0.05;
+      const yOffset = (isTop ? 1 : -1) * indexFromNewest * 16;
+      el.style.transform = `translateY(${yOffset}px) scale(${scale})`;
+      el.style.zIndex = String(100 - indexFromNewest);
+      if (indexFromNewest > 3) {
+        el.style.opacity = "0";
+        el.style.pointerEvents = "none";
+      } else {
+        el.style.opacity = indexFromNewest === 0 ? "1" : String(1 - indexFromNewest * 0.15);
+        el.style.pointerEvents = indexFromNewest === 0 ? "auto" : "none";
+      }
+    });
+  }
   // ─── Public API ───────────────────────────────────────────────────────────
   /**
    * Show a toast. Returns the toast element for imperative control.
@@ -655,7 +400,7 @@ class NotifyX {
     if (!opts.id) opts.id = `nx-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     if (opts.id && activeToastIds.has(opts.id)) {
       const existing = activeToastIds.get(opts.id);
-      AnimationEngine.pulse(existing);
+      this.pulse(existing);
       return existing;
     }
     const container = getContainer(opts.position);
@@ -666,10 +411,14 @@ class NotifyX {
       activeToastIds.set(opts.id, el);
       this.attachGestures(el, opts.id);
     }
-    AnimationEngine.enter(el, opts.animation, opts.position);
+    el.style.opacity = "0";
+    el.style.transform = `translateY(${opts.position.includes("top") ? "-20px" : "20px"}) scale(0.9)`;
+    requestAnimationFrame(() => {
+      this.updateStackLayout(container, opts.position);
+    });
     if (opts.priority === "critical") {
       setTimeout(() => {
-        AnimationEngine.shake(el);
+        this.pulse(el);
         const focusable = el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
         if (focusable.length) {
           const first = focusable[0];
@@ -733,7 +482,11 @@ class NotifyX {
     const container = getContainer("center");
     const el = this.createLoaderElement(opts);
     container.appendChild(el);
-    AnimationEngine.enter(el, "fade");
+    el.style.opacity = "0";
+    el.style.transform = `translateY(20px) scale(0.9)`;
+    requestAnimationFrame(() => {
+      this.updateStackLayout(container, "center");
+    });
     activeLoadingToast = el;
   }
   /** @public */
@@ -979,20 +732,6 @@ class NotifyX {
     });
     activeToastIds.clear();
     activeLoadingToast = null;
-    globalQueue.clear();
-  }
-  // ─── Advanced accessors ───────────────────────────────────────────────────
-  /** Access the global priority queue for advanced use cases. */
-  static get queue() {
-    return globalQueue;
-  }
-  /** Access AnimationEngine for advanced animation control. */
-  static get animation() {
-    return AnimationEngine;
-  }
-  /** Access StreamBridge for streaming utilities. */
-  static get stream_bridge() {
-    return StreamBridge;
   }
 }
 
@@ -1000,4 +739,4 @@ if (typeof window !== "undefined") {
   window.NotifyX = NotifyX;
 }
 
-export { ANIMATION_PRESETS, DEFAULT_OPTIONS, POSITIONS, THEMES, NotifyX as default };
+export { NotifyX as default };

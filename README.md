@@ -2,8 +2,8 @@
 
 # 🚀 NotifyX v4
 
-### The notification library built for the AI era.
-**Beautiful enough for designers, powerful enough for AI agents, fast enough for real-time streaming.**
+### The professional-grade notification library built for the AI era.
+**Visually stunning for designers, robust enough for complex architectures, and optimized for real-time AI streaming.**
 
 [![npm version](https://img.shields.io/npm/v/notifyx?color=success&style=flat-square)](https://www.npmjs.com/package/notifyx)
 [![npm downloads](https://img.shields.io/npm/dm/notifyx?style=flat-square)](https://www.npmjs.com/package/notifyx)
@@ -11,7 +11,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue?style=flat-square)](https://www.typescriptlang.org/)
 [![license](https://img.shields.io/npm/l/notifyx?style=flat-square)](LICENSE)
 
-[Demo](https://github.com/awalhadi/notifyx) • [Installation](#-installation) • [AI Integration](#-ai--mcp-integration) • [Streaming API](#-streaming-api) • [Themes](#-theme-system) • [Migration](#-migration-guide-v3--v4)
+[Demo](https://github.com/awalhadi/notifyx) • [Installation](#-installation) • [AI Integration](#-ai--mcp-integration) • [Stack UI](#-stack-based-ui--priority-queue) • [Themes](#-zero-dependency-theme-system)
 
 </div>
 
@@ -19,27 +19,21 @@
 
 ## ✨ Why NotifyX?
 
-NotifyX is designed for modern web applications. It is the first choice for:
-- Next.js / React apps
-- LLM-powered applications
-- MCP server result display
-- Agentic workflow UX
-- Laravel + Inertia.js projects
+NotifyX v4 is engineered from the ground up to solve the challenges of modern web applications. Whether you are building an LLM-powered agent workflow, a Next.js SaaS, or an interactive dashboard, NotifyX delivers a pristine user experience.
 
 ### Competitive Differentiation
 
 | Feature | NotifyX v4 | react-hot-toast | sonner | react-toastify |
 | :--- | :---: | :---: | :---: | :---: |
-| **AI/streaming API** | ✅ Native | ❌ | ❌ | ❌ |
-| **MCP-ready** | ✅ | ❌ | ❌ | ❌ |
-| **Animation presets** | ✅ 5 options | ❌ | limited | limited |
-| **Theme system** | ✅ 6 themes | ❌ | partial | partial |
-| **Vanilla JS support**| ✅ | ❌ | ❌ | partial |
-| **Zero dependencies** | ✅ | ✅ | ✅ | ❌ |
-| **Promise API** | ✅ | ✅ | ✅ | ✅ |
-| **Swipe-to-dismiss** | ✅ | ❌ | ✅ | partial |
-| **Rich content / actions**| ✅ | ❌ | partial | ✅ |
-| **Bundle < 5KB** | ✅ | ✅ | ✅ | ❌ |
+| **Stack-Based UI** | ✅ Elegant 3D | ❌ | ✅ | ❌ |
+| **AI/Streaming API** | ✅ Native | ❌ | ❌ | ❌ |
+| **MCP-Ready** | ✅ | ❌ | ❌ | ❌ |
+| **Web Animations API** | ✅ GPU Accelerated | ❌ | limited | limited |
+| **Theme System** | ✅ 6 robust themes | ❌ | partial | partial |
+| **Vanilla JS Support**| ✅ | ❌ | ❌ | partial |
+| **Priority Queue** | ✅ | ❌ | ❌ | ❌ |
+| **Zero Dependencies** | ✅ | ✅ | ✅ | ❌ |
+| **Bundle < 7KB** | ✅ | ✅ | ✅ | ❌ |
 
 ---
 
@@ -52,24 +46,33 @@ npm install notifyx
 # pnpm
 pnpm add notifyx
 
-# yarn / bun
-yarn add notifyx
+# bun
+bun add notifyx
 ```
 
 ### Setup
 
 ```javascript
 import NotifyX from 'notifyx';
-import 'notifyx/style.css'; // Don't forget the CSS!
+import 'notifyx/style.css'; // Required for UI styling
 
 NotifyX.success('Ready for the AI era! 🚀');
 ```
 
 ---
 
+## 🏗 Stack-Based UI & Priority Queue
+
+NotifyX v4 departs from legacy list-based rendering, introducing a **Stack-Based Architecture**. 
+Notifications gracefully stack with dynamic `transform: scale()` and `translateY()` 3D layering, saving vertical screen real estate while feeling incredibly premium.
+
+Under the hood, the **Priority Queue Manager** handles influxes of notifications perfectly. If an application throws 20 events at once, NotifyX will instantly display the allowed maximum (`maxToasts`), gracefully holding the rest in memory and seamlessly rendering them as active toasts are dismissed.
+
+---
+
 ## 🤖 AI & MCP Integration
 
-NotifyX comes with first-class support for AI metadata, making it perfect for LLM and MCP integrations.
+NotifyX provides first-class support for AI metadata, rendering Model Context Protocol (MCP) tool calls, token counts, and latency flawlessly.
 
 ```javascript
 NotifyX.ai("Processing context...", {
@@ -82,13 +85,13 @@ NotifyX.ai("Processing context...", {
 });
 ```
 
-It renders beautifully with a custom `✦` icon, an indigo palette, and a metadata bar showing exactly what the agent is doing.
+It renders elegantly with a custom `✦` icon, specialized color palettes, and a structured metadata bar showcasing agent workflow steps.
 
 ---
 
 ## 🌊 Streaming API
 
-LLMs stream their responses token-by-token. NotifyX natively supports streaming updates without UI jank.
+LLMs stream responses token-by-token. NotifyX's `StreamingBridge` ensures smooth, jank-free progressive text rendering.
 
 ```javascript
 const stream = NotifyX.stream("Thinking...", {
@@ -96,26 +99,24 @@ const stream = NotifyX.stream("Thinking...", {
   position: "bottom-right"
 });
 
-// As tokens arrive
+// Stream chunks as they arrive
 stream.update("I have found ");
 stream.update("the specific bug ");
 stream.update("in your code.");
 
-// When complete
+// Finalize
 stream.success("Analysis complete!", {
   ai: { streaming: false, latencyMs: 850 }
 });
 ```
-
-A blinking `▋` cursor is natively rendered while streaming is active!
+*A blinking `▋` cursor is natively rendered while streaming is active!*
 
 ---
 
 ## ⏳ Promise API
 
-Manage asynchronous state beautifully with the robust Promise API.
+Manage asynchronous workflows beautifully.
 
-### Example 1: Basic Fetch
 ```javascript
 NotifyX.promise(
   fetch('/api/user/profile'),
@@ -127,77 +128,57 @@ NotifyX.promise(
 );
 ```
 
-### Example 2: Dynamic Success Message
-```javascript
-NotifyX.promise(
-  saveSettings(data),
-  {
-    loading: 'Saving settings...',
-    success: (result) => `Settings saved for ${result.user.name}`,
-    error: 'Could not save settings'
-  }
-);
-```
-
-### Example 3: Dynamic Error Parsing
-```javascript
-NotifyX.promise(
-  uploadFile(file),
-  {
-    loading: 'Uploading...',
-    success: 'File uploaded successfully!',
-    error: (err) => `Upload failed: ${err.message}`
-  }
-);
-```
-
 ---
 
-## 🎨 Theme System
+## 🎨 Zero-Dependency Theme System
 
-NotifyX v4 ships with 6 distinct themes out of the box.
+NotifyX v4 ships with 6 distinct, highly-polished themes powered by Vanilla CSS Custom Properties—no Tailwind required.
 
-- `auto` (Default) — Matches system OS preference
-- `light` — Clean, modern white
+- `auto` (Default) — Adapts to OS preference
+- `light` — Pristine, modern white
 - `dark` — Deep, sleek dark mode
-- `glass` — Premium frosted glassmorphism (perfect for rich UI)
-- `minimal` — Flat, un-styled barebones (no shadows/borders)
-- `brutal` — Monochrome, monospace brutalist styling
+- `glass` — Premium frosted glassmorphism 
+- `minimal` — Flat, pure content focus
+- `brutal` — Monochrome, monospace brutalist
 
-### Applying Themes
-
-**Globally:**
+**Usage:**
 ```javascript
-// Apply to all toasts
+// Globally
 NotifyX.setTheme('glass');
-```
 
-**Per-Toast:**
-```javascript
+// Per-Toast
 NotifyX.success('Task complete', { theme: 'brutal' });
 ```
 
 ---
 
-## 🎬 Animation Presets
+## 🎬 Animation Engine
 
-Choose from 5 premium, GPU-accelerated entrance animations.
+Powered by the **Web Animations API** for buttery-smooth 60fps rendering, bypassing Main Thread blocking.
 
 - `spring` (Default) — Bouncy, physical, lively
-- `slide` — Smooth directional slide-in
-- `bloom` — Gentle scale and fade up
-- `flip` — 3D rotation flip
-- `fade` — Simple opacity fade
+- `slide` — Smooth directional translation
+- `bloom` — Elegant scale and fade
+- `flip` — 3D spatial rotation
+- `fade` — Simple opacity transition
 
 ```javascript
-NotifyX.info('New message arrived', { animation: 'bloom' });
+NotifyX.info('System update', { animation: 'bloom' });
 ```
 
 ---
 
-## ⚙️ Global Configuration
+## 🛠️ Advanced Subsystem Accessors
 
-Configure default behaviors once to apply to all toasts.
+Because NotifyX v4 is built on a modular architecture, we expose the underlying subsystems directly on the `NotifyX` object for advanced control:
+
+- **`NotifyX.queue`**: Access the Min-Heap priority queue (`ToastQueue`) instance. Manage overflow, peak queued states, or manually flush items.
+- **`NotifyX.animation`**: Access the `AnimationEngine` directly. Hook into the Web Animations API (WAAPI) engine to apply `staggerEnter`, `pulse`, or `shake` animations to your own UI elements.
+- **`NotifyX.stream_bridge`**: Access the `StreamBridge` utility. Use its `fromIterable` and `pipe` helpers to map arbitrary LLM data streams directly into DOM nodes.
+
+---
+
+## ⚙️ Global Configuration
 
 ```javascript
 NotifyX.configure({
@@ -212,19 +193,6 @@ NotifyX.configure({
 
 ---
 
-## 🔄 Migration Guide (v3 → v4)
-
-**All v3 API methods are fully backward-compatible!** You can safely upgrade without breaking existing code.
-
-**What's new:**
-- Imports have been consolidated. You can now import types directly: `import type { ToastOptions } from 'notifyx';`
-- `.stream()` now returns a `StreamController` object instead of just an ID.
-- The `ai` property has been added to `ToastOptions` for agent metadata.
-- CSS size is drastically optimized and GPU-accelerated.
-- Added native touch/swipe-to-dismiss support on mobile devices.
-
----
-
 <div align="center">
-Generated for NotifyX by A Awal Hadi — <a href="https://github.com/awalhadi/notifyx">awalhadi/notifyx</a>
+Engineered for the modern web — <a href="https://github.com/awalhadi/notifyx">awalhadi/notifyx</a>
 </div>

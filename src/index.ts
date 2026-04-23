@@ -16,8 +16,6 @@ export type {
   AIMetadata,
 } from './types';
 
-export { POSITIONS, ANIMATION_PRESETS, THEMES, DEFAULT_OPTIONS } from './core/constants';
-
 if (typeof window !== 'undefined') {
   (window as any).NotifyX = NotifyX;
 }

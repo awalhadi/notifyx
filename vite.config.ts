@@ -31,8 +31,8 @@ export default defineConfig({
     rollupOptions: {
       external: [],
       output: {
-        // Avoid warning for mixing default and named exports in UMD build
-        exports: 'named',
+        // Use default export so UMD/CJS expose the class directly
+        exports: 'default',
         banner
       }
     },

@@ -101,31 +101,3 @@
   padding-top: 8px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
-.notifyx-action-btn {
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.15s ease;
-  letter-spacing: 0.01em;
-}
-.notifyx-action-btn-primary {
-  background: currentColor;
-  color: #fff;
-  border-color: currentColor;
-}
-.notifyx-action-btn-ghost {
-  background: transparent;
-  color: inherit;
-  border-color: rgba(0, 0, 0, 0.15);
-}
-.notifyx-action-btn-ghost:hover {
-  background: rgba(0, 0, 0, 0.06);
-}
-.notifyx-action-btn-danger {
-  background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
-  border-color: rgba(239, 68, 68, 0.25);
-}

@@ -57,7 +57,7 @@ if command -v gzip &> /dev/null; then
   
   # Size check
   if [ "$umd_gzip" -gt 2048 ]; then
-    echo -e "\n${YELLOW}⚠️  UMD gzipped size is above 2KB target${NC}"
+    echo -e "\n${YELLOW}⚠️  UMD gzipped size is above 7KB target${NC}"
   fi
 else
   ls -lh dist/*.js dist/*.css
@@ -74,7 +74,7 @@ if command -v jq &> /dev/null; then
   types=$(jq -r '.types' package.json)
   sideEffects=$(jq -r '.sideEffects' package.json)
   
-  [ "$main" == "dist/notifyx.min.js" ] && echo -e "${GREEN}✓${NC} main: $main" || echo -e "${RED}✗${NC} main: $main"
+  [ "$main" == "dist/notifyx.cjs" ] && echo -e "${GREEN}✓${NC} main: $main" || echo -e "${RED}✗${NC} main: $main"
   [ "$module" == "dist/notifyx.es.js" ] && echo -e "${GREEN}✓${NC} module: $module" || echo -e "${RED}✗${NC} module: $module"
   [ "$types" == "./dist/index.d.ts" ] && echo -e "${GREEN}✓${NC} types: $types" || echo -e "${RED}✗${NC} types: $types"
   [ "$sideEffects" == "false" ] && echo -e "${GREEN}✓${NC} sideEffects: $sideEffects" || echo -e "${RED}✗${NC} sideEffects: $sideEffects"

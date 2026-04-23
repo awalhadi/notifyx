@@ -8,10 +8,15 @@ import type {
   StreamController,
   PromiseOptions,
   AIMetadata,
-  Position
+  Position,
 } from "../types";
 import { getContainer } from "../utils/dom";
-import { DEFAULT_OPTIONS } from "./constants";
+import {
+  DEFAULT_OPTIONS,
+  POSITIONS,
+  ANIMATION_PRESETS,
+  THEMES,
+} from "./constants";
 import { AnimationEngine } from "./AnimationEngine";
 import { ToastQueue } from "./ToastQueue";
 import { StreamBridge } from "./StreamBridge";
@@ -31,12 +36,12 @@ interface NotifyXElement extends HTMLElement {
 
 const SVG_ICONS: Record<ToastType | "ai", string> = {
   success: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 10.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  error:   `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M7 7l6 6M13 7l-6 6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`,
+  error: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M7 7l6 6M13 7l-6 6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`,
   warning: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M9.106 3.481L1.925 16.05A1 1 0 002.819 17.5h14.362a1 1 0 00.894-1.45L10.894 3.48a1 1 0 00-1.788 0z" stroke="currentColor" stroke-width="1.5"/><path d="M10 8v4M10 13.5v.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`,
-  info:    `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5M10 6.5v.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`,
+  info: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5M10 6.5v.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`,
   default: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="3" fill="currentColor"/></svg>`,
   loading: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" stroke-dasharray="24 16" transform="rotate(45 10 10)"/></svg>`,
-  ai:      `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10 2l2.4 5.6L18 10l-5.6 2.4L10 18l-2.4-5.6L2 10l5.6-2.4L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>`,
+  ai: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10 2l2.4 5.6L18 10l-5.6 2.4L10 18l-2.4-5.6L2 10l5.6-2.4L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>`,
 };
 
 // ─── Module-level state ────────────────────────────────────────────────────────
@@ -45,7 +50,7 @@ let activeLoadingToast: HTMLElement | null = null;
 const globalQueue = new ToastQueue(100);
 const activeToastIds = new Map<string, HTMLElement>();
 let globalDefaults: Partial<ToastOptions> = {};
-let globalTheme: ThemePreset = 'auto';
+let globalTheme: ThemePreset = "auto";
 
 // ─── NotifyX ──────────────────────────────────────────────────────────────────
 
@@ -55,6 +60,10 @@ let globalTheme: ThemePreset = 'auto';
  * @public
  */
 export default class NotifyX {
+  public static readonly POSITIONS = POSITIONS;
+  public static readonly ANIMATION_PRESETS = ANIMATION_PRESETS;
+  public static readonly THEMES = THEMES;
+  public static readonly DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
   // ─── Element Builders ─────────────────────────────────────────────────────
 
@@ -65,16 +74,16 @@ export default class NotifyX {
     let isDragging = false;
 
     const onStart = (e: TouchEvent | MouseEvent) => {
-      startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      startX = "touches" in e ? e.touches[0].clientX : e.clientX;
       isDragging = true;
-      element.style.transition = 'none';
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onEnd);
+      element.style.transition = "none";
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onEnd);
     };
 
     const onMove = (e: TouchEvent | MouseEvent) => {
       if (!isDragging) return;
-      currentX = ('touches' in e ? e.touches[0].clientX : e.clientX) - startX;
+      currentX = ("touches" in e ? e.touches[0].clientX : e.clientX) - startX;
       element.style.transform = `translateX(${currentX}px) rotate(${currentX * 0.03}deg)`;
       element.style.opacity = String(1 - Math.abs(currentX) / 200);
     };
@@ -82,38 +91,42 @@ export default class NotifyX {
     const onEnd = () => {
       if (!isDragging) return;
       isDragging = false;
-      element.style.transition = '';
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onEnd);
+      element.style.transition = "";
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onEnd);
       if (Math.abs(currentX) > 100) {
         const direction = currentX > 0 ? 1 : -1;
         element.style.transform = `translateX(${direction * 200}px) rotate(${direction * 10}deg)`;
-        element.style.opacity = '0';
+        element.style.opacity = "0";
         setTimeout(() => NotifyX.dismiss(id), 200);
       } else {
-        element.style.transform = '';
-        element.style.opacity = '';
+        element.style.transform = "";
+        element.style.opacity = "";
       }
       currentX = 0;
     };
 
-    element.addEventListener('touchstart', onStart, { passive: true });
-    element.addEventListener('touchmove', onMove, { passive: true });
-    element.addEventListener('touchend', onEnd);
-    element.addEventListener('mousedown', onStart);
+    element.addEventListener("touchstart", onStart, { passive: true });
+    element.addEventListener("touchmove", onMove, { passive: true });
+    element.addEventListener("touchend", onEnd);
+    element.addEventListener("mousedown", onStart);
   }
 
   /** @private */
   private static createToastElement(opts: NormalizedToastOptions): HTMLElement {
     const toast = document.createElement("div");
-    toast.className = [
-      "notifyx",
-      `notifyx-${opts.type}`,
-      opts.className ?? "",
-    ].filter(Boolean).join(" ");
+    toast.className = ["notifyx", `notifyx-${opts.type}`, opts.className ?? ""]
+      .filter(Boolean)
+      .join(" ");
 
-    toast.setAttribute("role", (opts.type === "error" || opts.type === "warning") ? "alert" : "status");
-    toast.setAttribute("aria-live", opts.priority === "critical" ? "assertive" : "polite");
+    toast.setAttribute(
+      "role",
+      opts.type === "error" || opts.type === "warning" ? "alert" : "status",
+    );
+    toast.setAttribute(
+      "aria-live",
+      opts.priority === "critical" ? "assertive" : "polite",
+    );
     toast.setAttribute("aria-atomic", "true");
     if (opts.id) toast.setAttribute("data-id", opts.id);
     if (opts.theme && opts.theme !== "auto") {
@@ -125,7 +138,11 @@ export default class NotifyX {
     if (opts.onClick) {
       toast.style.cursor = "pointer";
       toast.addEventListener("click", (e) => {
-        if (!(e.target as HTMLElement).closest(".notifyx-close, .notifyx-action-btn"))
+        if (
+          !(e.target as HTMLElement).closest(
+            ".notifyx-close, .notifyx-action-btn",
+          )
+        )
           opts.onClick!(opts.id!);
       });
     }
@@ -159,7 +176,6 @@ export default class NotifyX {
       textBlock.appendChild(title);
     }
 
-
     const msg = document.createElement("span");
     msg.className = "notifyx-msg";
     if (opts.richHtml) {
@@ -167,7 +183,7 @@ export default class NotifyX {
     } else {
       msg.textContent = opts.message;
     }
-    
+
     if (opts.ai?.streaming) {
       const cursor = document.createElement("span");
       cursor.className = "notifyx-stream-cursor";
@@ -175,6 +191,24 @@ export default class NotifyX {
     }
 
     textBlock.appendChild(msg);
+
+    // Action buttons
+    if (opts.actions && opts.actions.length > 0) {
+      const actionsBar = document.createElement("div");
+      actionsBar.className = "notifyx-actions";
+      for (const action of opts.actions) {
+        const btn = document.createElement("button");
+        btn.className = `notifyx-action-btn notifyx-action-${action.variant ?? "ghost"}`;
+        btn.textContent = action.label;
+        btn.setAttribute("type", "button");
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          action.onClick(opts.id!);
+        });
+        actionsBar.appendChild(btn);
+      }
+      textBlock.appendChild(actionsBar);
+    }
 
     row.appendChild(textBlock);
     contentWrapper.appendChild(row);
@@ -186,22 +220,28 @@ export default class NotifyX {
       closeBtn.setAttribute("aria-label", "Dismiss notification");
       closeBtn.setAttribute("type", "button");
       closeBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>`;
-      closeBtn.onclick = (e) => { e.stopPropagation(); this.removeToast(toast, opts); };
+      closeBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.removeToast(toast, opts);
+      };
       contentWrapper.appendChild(closeBtn);
     }
 
-    
     // AI Metadata
     if (opts.ai) {
       if (opts.ai.streaming) {
         toast.setAttribute("data-streaming", "true");
       }
-      
-      const hasMeta = opts.ai.model || opts.ai.toolName || opts.ai.latencyMs || opts.ai.tokens;
+
+      const hasMeta =
+        opts.ai.model ||
+        opts.ai.toolName ||
+        opts.ai.latencyMs ||
+        opts.ai.tokens;
       if (hasMeta) {
         const metaBar = document.createElement("div");
         metaBar.className = "notifyx-ai-meta";
-        
+
         if (opts.ai.model) {
           const badge = document.createElement("span");
           badge.className = "notifyx-ai-meta-badge";
@@ -224,27 +264,12 @@ export default class NotifyX {
           txt.textContent = `${opts.ai.latencyMs}ms`;
           metaBar.appendChild(txt);
         }
-        
+
         contentWrapper.appendChild(metaBar);
       }
     }
 
     toast.appendChild(contentWrapper);
-
-    // Action buttons
-    if (opts.actions && opts.actions.length > 0) {
-      const actionsBar = document.createElement("div");
-      actionsBar.className = "notifyx-actions";
-      for (const action of opts.actions) {
-        const btn = document.createElement("button");
-        btn.className = `notifyx-action-btn notifyx-action-btn-${action.variant ?? "ghost"}`;
-        btn.textContent = action.label;
-        btn.setAttribute("type", "button");
-        btn.addEventListener("click", (e) => { e.stopPropagation(); action.onClick(opts.id!); });
-        actionsBar.appendChild(btn);
-      }
-      toast.appendChild(actionsBar);
-    }
 
     // Progress bar
     if (opts.showProgress && opts.duration > 0) {
@@ -257,7 +282,9 @@ export default class NotifyX {
   }
 
   /** @private */
-  private static createLoaderElement(opts: NormalizedToastOptions): HTMLElement {
+  private static createLoaderElement(
+    opts: NormalizedToastOptions,
+  ): HTMLElement {
     const toast = document.createElement("div");
     toast.className = `notifyx notifyx-loading notifyx-${opts.type}`;
     toast.setAttribute("role", "status");
@@ -288,7 +315,7 @@ export default class NotifyX {
   /** @private */
   private static async removeToast(
     el: HTMLElement,
-    opts: NormalizedToastOptions
+    opts: NormalizedToastOptions,
   ): Promise<void> {
     if (el.hasAttribute("data-removing")) return;
     el.setAttribute("data-removing", "true");
@@ -308,55 +335,129 @@ export default class NotifyX {
 
     if (opts.id) activeToastIds.delete(opts.id);
 
-    await AnimationEngine.exit(el, (opts.animation ?? "spring") as AnimationPreset, opts.position);
+    // Fade out and remove
+    el.style.opacity = "0";
+    el.style.transform = `translateY(${el.style.transform.includes("translateY") ? el.style.transform.split("translateY(")[1].split(")")[0] : "0px"}) scale(0.9)`;
 
-    if (el.isConnected) el.remove();
-    if (el.parentElement?.childNodes.length === 0) el.parentElement.remove();
-    opts.onClose?.(opts.id!);
+    // Update stack layout so remaining toasts adjust immediately
+    if (el.parentElement) {
+      this.updateStackLayout(
+        el.parentElement as HTMLElement,
+        el.parentElement.getAttribute("data-position") || "bottom-right",
+      );
+    }
+
+    setTimeout(() => {
+      if (el.isConnected) el.remove();
+      if (el.parentElement?.childNodes.length === 0) el.parentElement.remove();
+      opts.onClose?.(opts.id!);
+    }, 400);
   }
 
   /** @private */
-  private static setupAutoDismiss(el: HTMLElement, opts: NormalizedToastOptions): void {
+  private static setupAutoDismiss(
+    el: HTMLElement,
+    opts: NormalizedToastOptions,
+  ): void {
     if (!opts.duration || opts.duration <= 0) return;
 
     const bar = el.querySelector(".notifyx-progress-bar") as HTMLElement | null;
-    const td = { timeoutId: null as number | null, startTime: Date.now(), remaining: opts.duration, paused: false };
+    const td = {
+      timeoutId: null as number | null,
+      startTime: Date.now(),
+      remaining: opts.duration,
+      paused: false,
+    };
 
     if (bar) {
       bar.style.width = "100%";
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        bar.style.transition = `width ${opts.duration}ms linear`;
-        bar.style.width = "0%";
-      }));
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          bar.style.transition = `width ${opts.duration}ms linear`;
+          bar.style.width = "0%";
+        }),
+      );
     }
 
     const pause = () => {
       if (td.paused || td.timeoutId === null) return;
       td.paused = true;
       td.remaining = Math.max(0, td.remaining - (Date.now() - td.startTime));
-      if (bar) { const w = getComputedStyle(bar).width; bar.style.transition = "none"; bar.style.width = w; void bar.offsetWidth; }
-      clearTimeout(td.timeoutId); td.timeoutId = null;
+      if (bar) {
+        const w = getComputedStyle(bar).width;
+        bar.style.transition = "none";
+        bar.style.width = w;
+        void bar.offsetWidth;
+      }
+      clearTimeout(td.timeoutId);
+      td.timeoutId = null;
     };
 
     const resume = () => {
       if (!td.paused || td.remaining <= 0) return;
-      td.paused = false; td.startTime = Date.now();
-      if (bar) requestAnimationFrame(() => { bar.style.transition = `width ${td.remaining}ms linear`; bar.style.width = "0%"; });
-      td.timeoutId = window.setTimeout(() => this.removeToast(el, opts), td.remaining);
+      td.paused = false;
+      td.startTime = Date.now();
+      if (bar)
+        requestAnimationFrame(() => {
+          bar.style.transition = `width ${td.remaining}ms linear`;
+          bar.style.width = "0%";
+        });
+      td.timeoutId = window.setTimeout(
+        () => this.removeToast(el, opts),
+        td.remaining,
+      );
     };
 
     (el as NotifyXElement).__notifyxPauseTimer = pause;
     (el as NotifyXElement).__notifyxResumeTimer = resume;
     (el as NotifyXElement).__notifyxTimeout = td;
 
-    if (opts.pauseOnHover) { el.addEventListener("mouseenter", pause); el.addEventListener("mouseleave", resume); }
-    td.timeoutId = window.setTimeout(() => this.removeToast(el, opts), opts.duration);
+    if (opts.pauseOnHover) {
+      el.addEventListener("mouseenter", pause);
+      el.addEventListener("mouseleave", resume);
+    }
+    td.timeoutId = window.setTimeout(
+      () => this.removeToast(el, opts),
+      opts.duration,
+    );
   }
 
   /** @private */
   private static enforceMaxToasts(container: HTMLElement, max: number): void {
-    const toasts = container.querySelectorAll<HTMLElement>(".notifyx:not([data-removing])");
-    if (toasts.length >= max) this.removeToast(toasts[0], {} as NormalizedToastOptions);
+    const toasts = container.querySelectorAll<HTMLElement>(
+      ".notifyx:not([data-removing])",
+    );
+    if (toasts.length >= max)
+      this.removeToast(toasts[0], {} as NormalizedToastOptions);
+  }
+
+  /** @private */
+  private static updateStackLayout(
+    container: HTMLElement,
+    position: string,
+  ): void {
+    const toasts = Array.from(
+      container.querySelectorAll<HTMLElement>(".notifyx:not([data-removing])"),
+    );
+    const isTop = position.includes("top");
+
+    toasts.forEach((el, idx) => {
+      const indexFromNewest = toasts.length - 1 - idx;
+      const scale = 1 - indexFromNewest * 0.05;
+      const yOffset = (isTop ? 1 : -1) * indexFromNewest * 16;
+
+      el.style.transform = `translateY(${yOffset}px) scale(${scale})`;
+      el.style.zIndex = String(100 - indexFromNewest);
+
+      if (indexFromNewest > 3) {
+        el.style.opacity = "0";
+        el.style.pointerEvents = "none";
+      } else {
+        el.style.opacity =
+          indexFromNewest === 0 ? "1" : String(1 - indexFromNewest * 0.15);
+        el.style.pointerEvents = indexFromNewest === 0 ? "auto" : "none";
+      }
+    });
   }
 
   // ─── Public API ───────────────────────────────────────────────────────────
@@ -366,9 +467,15 @@ export default class NotifyX {
    * @public
    */
   public static show(options: ToastOptions): HTMLElement {
-    const opts = { ...DEFAULT_OPTIONS, ...globalDefaults, animation: "spring" as AnimationPreset, ...options } as NormalizedToastOptions;
+    const opts = {
+      ...DEFAULT_OPTIONS,
+      ...globalDefaults,
+      animation: "spring" as AnimationPreset,
+      ...options,
+    } as NormalizedToastOptions;
     if (globalTheme !== "auto" && !opts.theme) opts.theme = globalTheme;
-    if (!opts.id) opts.id = `nx-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    if (!opts.id)
+      opts.id = `nx-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
     // Dedup by ID — pulse existing toast
     if (opts.id && activeToastIds.has(opts.id)) {
@@ -387,18 +494,26 @@ export default class NotifyX {
       this.attachGestures(el, opts.id);
     }
 
-    AnimationEngine.enter(el, opts.animation as AnimationPreset, opts.position);
+    // Set initial state before the next frame applies the real stack state
+    el.style.opacity = "0";
+    el.style.transform = `translateY(${opts.position.includes("top") ? "-20px" : "20px"}) scale(0.9)`;
+
+    requestAnimationFrame(() => {
+      this.updateStackLayout(container, opts.position);
+    });
 
     if (opts.priority === "critical") {
       setTimeout(() => {
         AnimationEngine.shake(el);
-        const focusable = el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        const focusable = el.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
         if (focusable.length) {
           const first = focusable[0] as HTMLElement;
           const last = focusable[focusable.length - 1] as HTMLElement;
           first.focus();
-          el.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
+          el.addEventListener("keydown", (e) => {
+            if (e.key === "Tab") {
               if (e.shiftKey) {
                 if (document.activeElement === first) {
                   last.focus();
@@ -421,78 +536,123 @@ export default class NotifyX {
   }
 
   /** @public */
-  public static success(msg: string, options?: Partial<ToastOptions>): HTMLElement {
+  public static success(
+    msg: string,
+    options?: Partial<ToastOptions>,
+  ): HTMLElement {
     return this.show({ ...options, message: msg, type: "success" });
   }
 
   /** @public */
-  public static error(msg: string, options?: Partial<ToastOptions>): HTMLElement {
+  public static error(
+    msg: string,
+    options?: Partial<ToastOptions>,
+  ): HTMLElement {
     return this.show({ ...options, message: msg, type: "error" });
   }
 
   /** @public */
-  public static warning(msg: string, options?: Partial<ToastOptions>): HTMLElement {
+  public static warning(
+    msg: string,
+    options?: Partial<ToastOptions>,
+  ): HTMLElement {
     return this.show({ ...options, message: msg, type: "warning" });
   }
 
-
   /** @public */
-  public static info(msg: string, options?: Partial<ToastOptions>): HTMLElement {
+  public static info(
+    msg: string,
+    options?: Partial<ToastOptions>,
+  ): HTMLElement {
     return this.show({ ...options, message: msg, type: "info" });
   }
 
   /** @public */
-  public static ai(msg: string, options?: Partial<ToastOptions> & { agentName?: string, confidence?: number, showCursor?: boolean }): HTMLElement {
+  public static ai(
+    msg: string,
+    options?: Partial<ToastOptions> & {
+      agentName?: string;
+      confidence?: number;
+      showCursor?: boolean;
+    },
+  ): HTMLElement {
     const aiOpts: AIMetadata = { ...options?.ai };
     if (options?.agentName) aiOpts.model = options.agentName;
     if (options?.confidence) aiOpts.confidence = options.confidence;
     if (options?.showCursor) aiOpts.streaming = true;
-    
-    return this.show({ ...options, message: msg, type: "ai", ai: Object.keys(aiOpts).length > 0 ? aiOpts : undefined });
-  }
 
+    return this.show({
+      ...options,
+      message: msg,
+      type: "ai",
+      ai: Object.keys(aiOpts).length > 0 ? aiOpts : undefined,
+    });
+  }
 
   /**
    * Show a centered loading toast. Dismiss with `dismissLoading()`.
    * @public
    */
   public static loading(msg: string, options?: Partial<ToastOptions>): void {
-    if (activeLoadingToast) { this.removeToast(activeLoadingToast, {} as NormalizedToastOptions); activeLoadingToast = null; }
-    const opts = { ...DEFAULT_OPTIONS, animation: "fade" as AnimationPreset, ...options, message: msg, type: "info" as ToastType, duration: 0, showProgress: false, dismissible: false, position: "center" as Position } as NormalizedToastOptions;
+    if (activeLoadingToast) {
+      this.removeToast(activeLoadingToast, {} as NormalizedToastOptions);
+      activeLoadingToast = null;
+    }
+    const opts = {
+      ...DEFAULT_OPTIONS,
+      animation: "fade" as AnimationPreset,
+      ...options,
+      message: msg,
+      type: "info" as ToastType,
+      duration: 0,
+      showProgress: false,
+      dismissible: false,
+      position: "center" as Position,
+    } as NormalizedToastOptions;
     const container = getContainer("center" as Position);
     const el = this.createLoaderElement(opts);
     container.appendChild(el);
-    AnimationEngine.enter(el, "fade");
+
+    el.style.opacity = "0";
+    el.style.transform = `translateY(20px) scale(0.9)`;
+    requestAnimationFrame(() => {
+      this.updateStackLayout(container, "center");
+    });
+
     activeLoadingToast = el;
   }
 
   /** @public */
   public static dismissLoading(): void {
-    if (activeLoadingToast) { this.removeToast(activeLoadingToast, {} as NormalizedToastOptions); activeLoadingToast = null; }
+    if (activeLoadingToast) {
+      this.removeToast(activeLoadingToast, {} as NormalizedToastOptions);
+      activeLoadingToast = null;
+    }
   }
 
   /**
    * Promise-based toast — loading → success | error.
    * @public
    */
-  
+
   /**
    * Shows a loading toast, then auto-transitions to success or error.
    * Perfect for API calls, file uploads, form submissions.
    */
   static promise<T>(
     promiseOrFn: Promise<T> | (() => Promise<T>),
-    options: PromiseOptions<T>
+    options: PromiseOptions<T>,
   ): Promise<T> {
     const id = options.id ?? `promise-${Date.now()}`;
-    const loadingOpts = typeof options.loading === 'string'
-      ? { message: options.loading }
-      : options.loading;
+    const loadingOpts =
+      typeof options.loading === "string"
+        ? { message: options.loading }
+        : options.loading;
 
     // Show loading toast
     NotifyX.show({
       ...loadingOpts,
-      type: 'loading',
+      type: "loading",
       duration: 0,
       dismissible: false,
       id,
@@ -500,41 +660,45 @@ export default class NotifyX {
       animation: options.animation,
     });
 
-    const p = typeof promiseOrFn === 'function' ? promiseOrFn() : promiseOrFn;
+    const p = typeof promiseOrFn === "function" ? promiseOrFn() : promiseOrFn;
 
-    return p.then((data) => {
-      const msg = typeof options.success === 'function'
-        ? options.success(data)
-        : typeof options.success === 'string'
-          ? options.success
-          : typeof options.success.message === 'function'
-            ? options.success.message(data)
-            : options.success.message;
+    return p
+      .then((data) => {
+        const msg =
+          typeof options.success === "function"
+            ? options.success(data)
+            : typeof options.success === "string"
+              ? options.success
+              : typeof options.success.message === "function"
+                ? options.success.message(data)
+                : options.success.message;
 
-      NotifyX.update(id, {
-        message: msg as string,
-        type: 'success',
-        duration: 4000,
-        dismissible: true,
+        NotifyX.update(id, {
+          message: msg as string,
+          type: "success",
+          duration: 4000,
+          dismissible: true,
+        });
+        return data;
+      })
+      .catch((err) => {
+        const msg =
+          typeof options.error === "function"
+            ? options.error(err)
+            : typeof options.error === "string"
+              ? options.error
+              : typeof options.error.message === "function"
+                ? options.error.message(err)
+                : options.error.message;
+
+        NotifyX.update(id, {
+          message: msg as string,
+          type: "error",
+          duration: 5000,
+          dismissible: true,
+        });
+        throw err;
       });
-      return data;
-    }).catch((err) => {
-      const msg = typeof options.error === 'function'
-        ? options.error(err)
-        : typeof options.error === 'string'
-          ? options.error
-          : typeof options.error.message === 'function'
-            ? options.error.message(err)
-            : options.error.message;
-
-      NotifyX.update(id, {
-        message: msg as string,
-        type: 'error',
-        duration: 5000,
-        dismissible: true,
-      });
-      throw err;
-    });
   }
 
   /**
@@ -543,12 +707,12 @@ export default class NotifyX {
    */
   static stream(options: StreamOptions): StreamController {
     const id = options.id ?? `stream-${Date.now()}`;
-    let accumulated = '';
+    let accumulated = "";
 
     NotifyX.show({
-      message: options.loadingMessage ?? '',
+      message: options.loadingMessage ?? "",
       title: options.title,
-      type: 'ai',
+      type: "ai",
       duration: 0,
       dismissible: false,
       id,
@@ -563,18 +727,18 @@ export default class NotifyX {
         options.onChunk?.(chunk, accumulated);
         NotifyX.update(id, {
           message: accumulated,
-          type: 'ai',
+          type: "ai",
         });
       },
       set(message: string) {
         accumulated = message;
-        NotifyX.update(id, { message: message, type: 'ai' });
+        NotifyX.update(id, { message: message, type: "ai" });
       },
       success(message: string, opts?: Partial<ToastOptions>) {
         options.onComplete?.(accumulated);
         NotifyX.update(id, {
           message,
-          type: 'success',
+          type: "success",
           duration: 4000,
           dismissible: true,
           ai: { streaming: false },
@@ -584,7 +748,7 @@ export default class NotifyX {
       error(message: string, opts?: Partial<ToastOptions>) {
         NotifyX.update(id, {
           message,
-          type: 'error',
+          type: "error",
           duration: 5000,
           dismissible: true,
           ai: { streaming: false },
@@ -603,26 +767,25 @@ export default class NotifyX {
   static update(id: string, options: Partial<ToastOptions>): void {
     const el = activeToastIds.get(id);
     if (!el) return;
-    
 
     if (options.message) {
-      const msgEl = el.querySelector('.notifyx-msg');
+      const msgEl = el.querySelector(".notifyx-msg");
       if (msgEl) {
         if (options.richHtml) {
           msgEl.innerHTML = options.richHtml;
         } else {
           msgEl.textContent = options.message;
         }
-        
+
         // Handle streaming state updates
-        if (options.ai && 'streaming' in options.ai) {
+        if (options.ai && "streaming" in options.ai) {
           if (options.ai.streaming) {
             el.setAttribute("data-streaming", "true");
           } else {
             el.removeAttribute("data-streaming");
           }
         }
-        
+
         if (el.getAttribute("data-streaming") === "true") {
           const cursor = document.createElement("span");
           cursor.className = "notifyx-stream-cursor";
@@ -631,13 +794,12 @@ export default class NotifyX {
       }
     }
 
-    
     if (options.title) {
-      let titleEl = el.querySelector('.notifyx-title');
+      let titleEl = el.querySelector(".notifyx-title");
       if (!titleEl) {
-        titleEl = document.createElement('strong');
-        titleEl.className = 'notifyx-title';
-        const bodyEl = el.querySelector('.notifyx-body');
+        titleEl = document.createElement("strong");
+        titleEl.className = "notifyx-title";
+        const bodyEl = el.querySelector(".notifyx-body");
         if (bodyEl) bodyEl.insertBefore(titleEl, bodyEl.firstChild);
       }
       titleEl.textContent = options.title;
@@ -645,38 +807,54 @@ export default class NotifyX {
 
     if (options.type) {
       const classList = el.classList;
-      classList.forEach(cls => {
-        if (cls.startsWith('notifyx-') && !cls.match(/notifyx-(entering|exiting|stack-shifting|loading|streaming|stream-done)/)) {
-          if (['success', 'error', 'warning', 'info', 'ai', 'default'].includes(cls.replace('notifyx-', ''))) {
+      classList.forEach((cls) => {
+        if (
+          cls.startsWith("notifyx-") &&
+          !cls.match(
+            /notifyx-(entering|exiting|stack-shifting|loading|streaming|stream-done)/,
+          )
+        ) {
+          if (
+            ["success", "error", "warning", "info", "ai", "default"].includes(
+              cls.replace("notifyx-", ""),
+            )
+          ) {
             classList.remove(cls);
           }
         }
       });
       el.classList.add(`notifyx-${options.type}`);
-      
-      const iconEl = el.querySelector('.notifyx-icon');
+
+      const iconEl = el.querySelector(".notifyx-icon");
       if (iconEl && !options.icon) {
-        if (options.type === 'ai') {
+        if (options.type === "ai") {
           iconEl.innerHTML = SVG_ICONS.ai;
         } else {
-          iconEl.innerHTML = SVG_ICONS[options.type as ToastType] || SVG_ICONS.default;
+          iconEl.innerHTML =
+            SVG_ICONS[options.type as ToastType] || SVG_ICONS.default;
         }
       }
     }
-    
+
     if (options.icon) {
-      const iconEl = el.querySelector('.notifyx-icon');
+      const iconEl = el.querySelector(".notifyx-icon");
       if (iconEl) {
-        iconEl.innerHTML = typeof options.icon === 'string' ? `<span style="font-size:1.1em">${options.icon}</span>` : '';
+        iconEl.innerHTML =
+          typeof options.icon === "string"
+            ? `<span style="font-size:1.1em">${options.icon}</span>`
+            : "";
         if (options.icon instanceof HTMLElement) {
-            iconEl.appendChild(options.icon);
+          iconEl.appendChild(options.icon);
         }
       }
     }
-    
+
     // Auto dismiss if duration > 0
     if (options.duration !== undefined && options.duration > 0) {
-      this.setupAutoDismiss(el, { ...DEFAULT_OPTIONS, ...options } as NormalizedToastOptions);
+      this.setupAutoDismiss(el, {
+        ...DEFAULT_OPTIONS,
+        ...options,
+      } as NormalizedToastOptions);
     }
   }
 
@@ -703,10 +881,13 @@ export default class NotifyX {
   /**
    * Show multiple toasts as a grouped batch with shared dismiss.
    */
-  static batch(toasts: ToastOptions[], sharedOptions?: Partial<ToastOptions>): string[] {
-    return toasts.map(t => {
+  static batch(
+    toasts: ToastOptions[],
+    sharedOptions?: Partial<ToastOptions>,
+  ): string[] {
+    return toasts.map((t) => {
       const el = this.show({ ...sharedOptions, ...t });
-      return el.getAttribute('data-id') || '';
+      return el.getAttribute("data-id") || "";
     });
   }
 
@@ -731,7 +912,6 @@ export default class NotifyX {
     globalDefaults = { ...globalDefaults, ...defaults };
   }
 
-  
   /**
    * Dismiss a toast by ID string or HTMLElement reference.
    * @public
@@ -761,11 +941,17 @@ export default class NotifyX {
   // ─── Advanced accessors ───────────────────────────────────────────────────
 
   /** Access the global priority queue for advanced use cases. */
-  static get queue(): ToastQueue { return globalQueue; }
+  static get queue(): ToastQueue {
+    return globalQueue;
+  }
 
   /** Access AnimationEngine for advanced animation control. */
-  static get animation(): typeof AnimationEngine { return AnimationEngine; }
+  static get animation(): typeof AnimationEngine {
+    return AnimationEngine;
+  }
 
   /** Access StreamBridge for streaming utilities. */
-  static get stream_bridge(): typeof StreamBridge { return StreamBridge; }
+  static get stream_bridge(): typeof StreamBridge {
+    return StreamBridge;
+  }
 }
