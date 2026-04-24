@@ -397,8 +397,8 @@
 }
 [data-notifyx-theme="brutal"] .notifyx-icon,
 .notifyx[data-notifyx-theme="brutal"] .notifyx-icon {
-  border-radius: 0 !important;
-  border: 2px solid #000 !important;
+  border: none !important;
+  background: transparent !important;
 }
 [data-notifyx-theme="brutal"] .notifyx::before,
 .notifyx[data-notifyx-theme="brutal"]::before { display: none; }
