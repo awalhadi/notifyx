@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="./src/styles/base.css">
+<style>
+  body { background: #111; color: white; height: 100vh; margin: 0; font-family: sans-serif; }
+  .notifyx-container {
+    padding: 20px;
+    /* make it a relative positioning context but maintain flex to set width? */
+    display: block; /* remove flex */
+  }
+  .notifyx {
+    position: absolute;
+    width: 380px;
+    background: #222;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    transition: all 0.4s cubic-bezier(0.2, 1, 0.2, 1);
+  }
+</style>
+</head>
+<body>
+  <div class="notifyx-container" data-position="bottom-right" style="bottom: 0; right: 0;">
+    <div class="notifyx" id="t1" style="bottom: 20px; right: 20px;">Toast 1</div>
+    <div class="notifyx" id="t2" style="bottom: 20px; right: 20px;">Toast 2</div>
+    <div class="notifyx" id="t3" style="bottom: 20px; right: 20px;">Toast 3</div>
+  </div>
+  <script>
+    const toasts = [document.getElementById('t1'), document.getElementById('t2'), document.getElementById('t3')];
+    // Newest is t3
+    toasts.forEach((el, idx) => {
+      const i = toasts.length - 1 - idx;
+      el.style.transform = `translateY(-${i * 15}px) scale(${1 - i * 0.05})`;
+      el.style.zIndex = 100 - i;
+      el.style.opacity = 1 - i * 0.2;
+    });
+  </script>
+</body>
+</html>

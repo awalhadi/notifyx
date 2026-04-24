@@ -5,63 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.0.0] - 2026-04-24
 
 ### Added
-- Comprehensive JSDoc comments for better IDE IntelliSense support
-- DOM container caching for improved performance
-- Type-safe exports with explicit Position type
-- NormalizedToastOptions internal type for better type safety
-- License header comment preservation in minified builds
+- **AI/LLM Streaming Bridge**: Native streaming API (`NotifyX.stream()`) for progressive token rendering.
+- **Stack-Based UI Architecture**: Elegant, non-overlapping toast stacking with dynamic scaling and transforms.
+- **Priority Queue Manager**: Intelligent queuing system to manage toast limits and display priorities.
+- **Web Animations API Engine**: 5 premium, GPU-accelerated animation presets (`spring`, `slide`, `bloom`, `flip`, `fade`).
+- **Advanced Theme Engine**: 6 zero-dependency CSS themes including `glass`, `brutal`, and `minimal`.
+- **Promise API**: Robust asynchronous state management with `NotifyX.promise()`.
+- **AI Metadata Support**: Custom UI for MCP tool calls, latency, and token metrics.
+- **Swipe-to-Dismiss**: Native gestural interactions for touch devices.
 
 ### Changed
-- Refactored NotifyX class with smaller, focused methods
-- Improved code organization following single responsibility principle
-- Enhanced TypeScript type definitions with better documentation
-- Optimized package.json files array to reduce npm package size
-- Updated build configuration for production-grade minification
+- **Zero-Dependency CSS**: Fully replaced Tailwind CSS with a scalable vanilla CSS custom property architecture.
+- **API Modernization**: Transitioned legacy class-based implementations to streamlined static methods (`NotifyX.success()`).
+- **Layout Robustness**: Re-architected DOM rendering, resolving clipping bugs by shifting from `contain: strict` to `contain: content`.
+- **UMD Build Fixes**: Fixed global scope exports in UMD builds. Main API remains under 7KB gzipped.
 
-### Performance
-- Added Map-based caching for container lookups
-- Reduced DOM queries through intelligent caching
-- Optimized Terser configuration with multi-pass compression
+### Removed
+- Removed all external CSS framework dependencies (Tailwind).
+- Removed legacy UI clipping rules.
 
-### Documentation
-- Added ARCHITECTURE.md with comprehensive design documentation
-- Added CONTRIBUTING.md with development guidelines
-- Added inline JSDoc for all public APIs
+## [3.0.0] - Previous Major Release
+- Initial introduction of static methods and basic theming.
 
-## [2.3.1] - Previous Release
-
-### Features
-- Improve Details documentation
-- Framework-agnostic toast notifications
-- TypeScript support with full type definitions
-- Multiple toast types: success, error, warning, info
-- Configurable positions: top-right, top-left, bottom-right, bottom-left
-- Auto-dismiss with configurable duration
-- Manual dismiss with close button
-- Maximum toast limit
-- Smooth CSS animations
-- Dark mode support
-- Accessibility features (ARIA attributes)
-- UMD and ESM builds
-- Separate CSS file for flexible styling
-
----
-
-## Version Guidelines
-
-### Types of Changes
-- **Added** - New features
-- **Changed** - Changes in existing functionality
-- **Deprecated** - Soon-to-be removed features
-- **Removed** - Removed features
-- **Fixed** - Bug fixes
-- **Security** - Vulnerability fixes
-- **Performance** - Performance improvements
-
-### Semantic Versioning
-- **MAJOR** (x.0.0) - Breaking changes
-- **MINOR** (0.x.0) - New features, backwards compatible
-- **PATCH** (0.0.x) - Bug fixes, no API changes
+## [2.3.1] - Previous Minor Release
+- Framework-agnostic toast notifications.
+- TypeScript support with full type definitions.

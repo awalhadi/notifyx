@@ -1,126 +1,93 @@
-/*!
- * NotifyX v2.3.0
- * A lightweight, framework-agnostic toast notification library
- * https://github.com/awalhadi/notifyx
- * @author A Awal Hadi
- */
-const containerCache = /* @__PURE__ */ new Map();
-const createToastContainer = (position) => {
-  const container = document.createElement("div");
-  container.className = "notifyx-container";
-  container.setAttribute("data-position", position);
-  container.setAttribute("aria-label", `Notifications ${position.replace("-", " ")}`);
-  return container;
-};
-const getContainer = (position) => {
-  const cached = containerCache.get(position);
-  if (cached && document.body.contains(cached)) {
-    return cached;
-  }
-  const existingContainer = document.querySelector(
-    `.notifyx-container[data-position="${position}"]`
-  );
-  if (existingContainer) {
-    containerCache.set(position, existingContainer);
-    return existingContainer;
-  }
-  const container = createToastContainer(position);
-  document.body.appendChild(container);
-  containerCache.set(position, container);
-  return container;
-};
+import type {
+  ToastOptions,
+  NormalizedToastOptions,
+  ToastType,
+  AnimationPreset,
+  ThemePreset,
+  StreamOptions,
+  StreamController,
+  PromiseOptions,
+  AIMetadata,
+  Position,
+} from "../types";
+import { getContainer } from "../utils/dom";
+import {
+  DEFAULT_OPTIONS,
+  POSITIONS,
+  ANIMATION_PRESETS,
+  THEMES,
+} from "./constants";
+import { AnimationEngine } from "./AnimationEngine";
+import { ToastQueue } from "./ToastQueue";
+import { StreamBridge } from "./StreamBridge";
 
-const POSITIONS = {
-  TOP_RIGHT: "top-right",
-  TOP_LEFT: "top-left",
-  TOP_CENTER: "top-center",
-  BOTTOM_RIGHT: "bottom-right",
-  BOTTOM_LEFT: "bottom-left",
-  BOTTOM_CENTER: "bottom-center",
-  CENTER: "center"
-};
-const ANIMATION_PRESETS = {
-  SPRING: "spring",
-  SLIDE: "slide",
-  BLOOM: "bloom",
-  FLIP: "flip",
-  FADE: "fade",
-  NONE: "none"
-};
-const THEMES = {
-  AUTO: "auto",
-  LIGHT: "light",
-  DARK: "dark",
-  GLASS: "glass",
-  MINIMAL: "minimal",
-  BRUTAL: "brutal"
-};
-const DEFAULT_OPTIONS = {
-  type: "info",
-  duration: 3e3,
-  position: "top-right",
-  dismissible: true,
-  maxToasts: 5,
-  animation: "spring",
-  theme: "auto",
-  pauseOnHover: true,
-  pauseOnFocus: false,
-  priority: "normal"
-};
+interface NotifyXElement extends HTMLElement {
+  __notifyxTimeout?: {
+    timeoutId: number | null;
+    startTime: number;
+    remaining: number;
+    paused: boolean;
+  };
+  __notifyxPauseTimer?: () => void;
+  __notifyxResumeTimer?: () => void;
+}
 
-const SVG_ICONS = {
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+
+const SVG_ICONS: Record<ToastType | "ai", string> = {
   success: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 10.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   error: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M7 7l6 6M13 7l-6 6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`,
   warning: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M9.106 3.481L1.925 16.05A1 1 0 002.819 17.5h14.362a1 1 0 00.894-1.45L10.894 3.48a1 1 0 00-1.788 0z" stroke="currentColor" stroke-width="1.5"/><path d="M10 8v4M10 13.5v.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`,
   info: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5M10 6.5v.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`,
   default: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="3" fill="currentColor"/></svg>`,
   loading: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" stroke-dasharray="24 16" transform="rotate(45 10 10)"/></svg>`,
-  ai: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10 2l2.4 5.6L18 10l-5.6 2.4L10 18l-2.4-5.6L2 10l5.6-2.4L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>`
+  ai: `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10 2l2.4 5.6L18 10l-5.6 2.4L10 18l-2.4-5.6L2 10l5.6-2.4L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>`,
 };
-let activeLoadingToast = null;
-const activeToastIds = /* @__PURE__ */ new Map();
-let globalDefaults = {};
-let globalTheme = "auto";
-class NotifyX {
-  static {
-    this.POSITIONS = POSITIONS;
-  }
-  static {
-    this.ANIMATION_PRESETS = ANIMATION_PRESETS;
-  }
-  static {
-    this.THEMES = THEMES;
-  }
-  static {
-    this.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
-  }
+
+// ─── Module-level state ────────────────────────────────────────────────────────
+
+let activeLoadingToast: HTMLElement | null = null;
+const globalQueue = new ToastQueue(100);
+const activeToastIds = new Map<string, HTMLElement>();
+let globalDefaults: Partial<ToastOptions> = {};
+let globalTheme: ThemePreset = "auto";
+
+// ─── NotifyX ──────────────────────────────────────────────────────────────────
+
+/**
+ * NotifyX — AI-native, premium toast notification library.
+ * Zero dependencies · Framework-agnostic · TypeScript-first
+ * @public
+ */
+export default class NotifyX {
+  public static readonly POSITIONS = POSITIONS;
+  public static readonly ANIMATION_PRESETS = ANIMATION_PRESETS;
+  public static readonly THEMES = THEMES;
+  public static readonly DEFAULT_OPTIONS = DEFAULT_OPTIONS;
+
   // ─── Element Builders ─────────────────────────────────────────────────────
+
   /** @private */
-  static pulse(el) {
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    el.classList.remove("nx-pulse-attention");
-    void el.offsetWidth;
-    el.classList.add("nx-pulse-attention");
-    el.addEventListener("animationend", () => el.classList.remove("nx-pulse-attention"), { once: true });
-  }
-  /** @private */
-  static attachGestures(element, id) {
+  private static attachGestures(element: HTMLElement, id: string): void {
     let startX = 0;
     let currentX = 0;
     let isDragging = false;
-    const onStart = (e) => {
+
+    const onStart = (e: TouchEvent | MouseEvent) => {
       startX = "touches" in e ? e.touches[0].clientX : e.clientX;
       isDragging = true;
       element.style.transition = "none";
       window.addEventListener("mousemove", onMove);
       window.addEventListener("mouseup", onEnd);
     };
-    const onMove = (e) => {
+
+    const onMove = (e: TouchEvent | MouseEvent) => {
       if (!isDragging) return;
       currentX = ("touches" in e ? e.touches[0].clientX : e.clientX) - startX;
       element.style.transform = `translateX(${currentX}px) rotate(${currentX * 0.03}deg)`;
       element.style.opacity = String(1 - Math.abs(currentX) / 200);
     };
+
     const onEnd = () => {
       if (!isDragging) return;
       isDragging = false;
@@ -138,21 +105,28 @@ class NotifyX {
       }
       currentX = 0;
     };
+
     element.addEventListener("touchstart", onStart, { passive: true });
     element.addEventListener("touchmove", onMove, { passive: true });
     element.addEventListener("touchend", onEnd);
     element.addEventListener("mousedown", onStart);
   }
+
   /** @private */
-  static createToastElement(opts) {
+  private static createToastElement(opts: NormalizedToastOptions): HTMLElement {
     const toast = document.createElement("div");
-    toast.className = [
-      "notifyx",
-      `notifyx-${opts.type}`,
-      opts.className ?? ""
-    ].filter(Boolean).join(" ");
-    toast.setAttribute("role", opts.type === "error" || opts.type === "warning" ? "alert" : "status");
-    toast.setAttribute("aria-live", opts.priority === "critical" ? "assertive" : "polite");
+    toast.className = ["notifyx", `notifyx-${opts.type}`, opts.className ?? ""]
+      .filter(Boolean)
+      .join(" ");
+
+    toast.setAttribute(
+      "role",
+      opts.type === "error" || opts.type === "warning" ? "alert" : "status",
+    );
+    toast.setAttribute(
+      "aria-live",
+      opts.priority === "critical" ? "assertive" : "polite",
+    );
     toast.setAttribute("aria-atomic", "true");
     if (opts.id) toast.setAttribute("data-id", opts.id);
     if (opts.theme && opts.theme !== "auto") {
@@ -160,32 +134,48 @@ class NotifyX {
     }
     if (opts.position) toast.setAttribute("data-position", opts.position);
     if (opts.animation) toast.setAttribute("data-animation", opts.animation);
+
     if (opts.onClick) {
       toast.style.cursor = "pointer";
       toast.addEventListener("click", (e) => {
-        if (!e.target.closest(".notifyx-close, .notifyx-action-btn"))
-          opts.onClick(opts.id);
+        if (
+          !(e.target as HTMLElement).closest(
+            ".notifyx-close, .notifyx-action-btn",
+          )
+        )
+          opts.onClick!(opts.id!);
       });
     }
+
+    // Content wrapper
     const contentWrapper = document.createElement("div");
     contentWrapper.className = "notifyx-content";
+
     const row = document.createElement("div");
     row.className = "notifyx-content-and-icon";
+
+    // Icon
     if (opts.showIcon) {
       const icon = document.createElement("div");
       icon.className = "notifyx-icon";
       icon.setAttribute("aria-hidden", "true");
-      icon.innerHTML = opts.icon ? `<span style="font-size:1.1em">${opts.icon}</span>` : SVG_ICONS[opts.type];
+      icon.innerHTML = opts.icon
+        ? `<span style="font-size:1.1em">${opts.icon}</span>`
+        : SVG_ICONS[opts.type];
       row.appendChild(icon);
     }
+
+    // Text block
     const textBlock = document.createElement("div");
     textBlock.className = "notifyx-body";
+
     if (opts.title) {
       const title = document.createElement("strong");
       title.className = "notifyx-title";
       title.textContent = opts.title;
       textBlock.appendChild(title);
     }
+
     const msg = document.createElement("span");
     msg.className = "notifyx-msg";
     if (opts.richHtml) {
@@ -193,12 +183,16 @@ class NotifyX {
     } else {
       msg.textContent = opts.message;
     }
+
     if (opts.ai?.streaming) {
       const cursor = document.createElement("span");
       cursor.className = "notifyx-stream-cursor";
       msg.appendChild(cursor);
     }
+
     textBlock.appendChild(msg);
+
+    // Action buttons
     if (opts.actions && opts.actions.length > 0) {
       const actionsBar = document.createElement("div");
       actionsBar.className = "notifyx-actions";
@@ -209,14 +203,17 @@ class NotifyX {
         btn.setAttribute("type", "button");
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
-          action.onClick(opts.id);
+          action.onClick(opts.id!);
         });
         actionsBar.appendChild(btn);
       }
       textBlock.appendChild(actionsBar);
     }
+
     row.appendChild(textBlock);
     contentWrapper.appendChild(row);
+
+    // Close button
     if (opts.dismissible) {
       const closeBtn = document.createElement("button");
       closeBtn.className = "notifyx-close";
@@ -229,14 +226,22 @@ class NotifyX {
       };
       contentWrapper.appendChild(closeBtn);
     }
+
+    // AI Metadata
     if (opts.ai) {
       if (opts.ai.streaming) {
         toast.setAttribute("data-streaming", "true");
       }
-      const hasMeta = opts.ai.model || opts.ai.toolName || opts.ai.latencyMs || opts.ai.tokens;
+
+      const hasMeta =
+        opts.ai.model ||
+        opts.ai.toolName ||
+        opts.ai.latencyMs ||
+        opts.ai.tokens;
       if (hasMeta) {
         const metaBar = document.createElement("div");
         metaBar.className = "notifyx-ai-meta";
+
         if (opts.ai.model) {
           const badge = document.createElement("span");
           badge.className = "notifyx-ai-meta-badge";
@@ -259,80 +264,121 @@ class NotifyX {
           txt.textContent = `${opts.ai.latencyMs}ms`;
           metaBar.appendChild(txt);
         }
+
         contentWrapper.appendChild(metaBar);
       }
     }
+
     toast.appendChild(contentWrapper);
+
+    // Progress bar
     if (opts.showProgress && opts.duration > 0) {
       const bar = document.createElement("div");
       bar.className = "notifyx-progress-bar";
       toast.appendChild(bar);
     }
+
     return toast;
   }
+
   /** @private */
-  static createLoaderElement(opts) {
+  private static createLoaderElement(
+    opts: NormalizedToastOptions,
+  ): HTMLElement {
     const toast = document.createElement("div");
     toast.className = `notifyx notifyx-loading notifyx-${opts.type}`;
     toast.setAttribute("role", "status");
     toast.setAttribute("aria-live", "polite");
     toast.setAttribute("aria-busy", "true");
+
     const wrapper = document.createElement("div");
     wrapper.className = "notifyx-loader";
+
     const spinner = document.createElement("div");
     spinner.className = "notifyx-spinner";
     spinner.setAttribute("aria-label", "Loading");
     wrapper.appendChild(spinner);
+
     if (opts.message) {
       const msg = document.createElement("span");
       msg.className = "notifyx-msg";
       msg.textContent = opts.message;
       wrapper.appendChild(msg);
     }
+
     toast.appendChild(wrapper);
     return toast;
   }
+
   // ─── Lifecycle ────────────────────────────────────────────────────────────
+
   /** @private */
-  static async removeToast(el, opts) {
+  private static async removeToast(
+    el: HTMLElement,
+    opts: NormalizedToastOptions,
+  ): Promise<void> {
     if (el.hasAttribute("data-removing")) return;
     el.setAttribute("data-removing", "true");
-    const timeoutData = el.__notifyxTimeout;
+
+    const timeoutData = (el as NotifyXElement).__notifyxTimeout;
     if (timeoutData?.timeoutId != null) {
       clearTimeout(timeoutData.timeoutId);
       timeoutData.timeoutId = null;
     }
-    const pause = el.__notifyxPauseTimer;
-    const resume = el.__notifyxResumeTimer;
+    const pause = (el as NotifyXElement).__notifyxPauseTimer;
+    const resume = (el as NotifyXElement).__notifyxResumeTimer;
     if (pause) el.removeEventListener("mouseenter", pause);
     if (resume) el.removeEventListener("mouseleave", resume);
-    delete el.__notifyxTimeout;
-    delete el.__notifyxPauseTimer;
-    delete el.__notifyxResumeTimer;
+    delete (el as NotifyXElement).__notifyxTimeout;
+    delete (el as NotifyXElement).__notifyxPauseTimer;
+    delete (el as NotifyXElement).__notifyxResumeTimer;
+
     if (opts.id) activeToastIds.delete(opts.id);
+
+    // Fade out and remove
     el.style.opacity = "0";
     el.style.transform = `translateY(${el.style.transform.includes("translateY") ? el.style.transform.split("translateY(")[1].split(")")[0] : "0px"}) scale(0.9)`;
+
+    // Update stack layout so remaining toasts adjust immediately
     if (el.parentElement) {
-      this.updateStackLayout(el.parentElement, el.parentElement.getAttribute("data-position") || "bottom-right");
+      this.updateStackLayout(
+        el.parentElement as HTMLElement,
+        el.parentElement.getAttribute("data-position") || "bottom-right",
+      );
     }
+
     setTimeout(() => {
       if (el.isConnected) el.remove();
       if (el.parentElement?.childNodes.length === 0) el.parentElement.remove();
-      opts.onClose?.(opts.id);
+      opts.onClose?.(opts.id!);
     }, 400);
   }
+
   /** @private */
-  static setupAutoDismiss(el, opts) {
+  private static setupAutoDismiss(
+    el: HTMLElement,
+    opts: NormalizedToastOptions,
+  ): void {
     if (!opts.duration || opts.duration <= 0) return;
-    const bar = el.querySelector(".notifyx-progress-bar");
-    const td = { timeoutId: null, startTime: Date.now(), remaining: opts.duration, paused: false };
+
+    const bar = el.querySelector(".notifyx-progress-bar") as HTMLElement | null;
+    const td = {
+      timeoutId: null as number | null,
+      startTime: Date.now(),
+      remaining: opts.duration,
+      paused: false,
+    };
+
     if (bar) {
       bar.style.width = "100%";
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        bar.style.transition = `width ${opts.duration}ms linear`;
-        bar.style.width = "0%";
-      }));
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          bar.style.transition = `width ${opts.duration}ms linear`;
+          bar.style.width = "0%";
+        }),
+      );
     }
+
     const pause = () => {
       if (td.paused || td.timeoutId === null) return;
       td.paused = true;
@@ -346,83 +392,125 @@ class NotifyX {
       clearTimeout(td.timeoutId);
       td.timeoutId = null;
     };
+
     const resume = () => {
       if (!td.paused || td.remaining <= 0) return;
       td.paused = false;
       td.startTime = Date.now();
-      if (bar) requestAnimationFrame(() => {
-        bar.style.transition = `width ${td.remaining}ms linear`;
-        bar.style.width = "0%";
-      });
-      td.timeoutId = window.setTimeout(() => this.removeToast(el, opts), td.remaining);
+      if (bar)
+        requestAnimationFrame(() => {
+          bar.style.transition = `width ${td.remaining}ms linear`;
+          bar.style.width = "0%";
+        });
+      td.timeoutId = window.setTimeout(
+        () => this.removeToast(el, opts),
+        td.remaining,
+      );
     };
-    el.__notifyxPauseTimer = pause;
-    el.__notifyxResumeTimer = resume;
-    el.__notifyxTimeout = td;
+
+    (el as NotifyXElement).__notifyxPauseTimer = pause;
+    (el as NotifyXElement).__notifyxResumeTimer = resume;
+    (el as NotifyXElement).__notifyxTimeout = td;
+
     if (opts.pauseOnHover) {
       el.addEventListener("mouseenter", pause);
       el.addEventListener("mouseleave", resume);
     }
-    td.timeoutId = window.setTimeout(() => this.removeToast(el, opts), opts.duration);
+    td.timeoutId = window.setTimeout(
+      () => this.removeToast(el, opts),
+      opts.duration,
+    );
   }
+
   /** @private */
-  static enforceMaxToasts(container, max) {
-    const toasts = container.querySelectorAll(".notifyx:not([data-removing])");
-    if (toasts.length >= max) this.removeToast(toasts[0], {});
+  private static enforceMaxToasts(container: HTMLElement, max: number): void {
+    const toasts = container.querySelectorAll<HTMLElement>(
+      ".notifyx:not([data-removing])",
+    );
+    if (toasts.length >= max)
+      this.removeToast(toasts[0], {} as NormalizedToastOptions);
   }
+
   /** @private */
-  static updateStackLayout(container, position) {
-    const toasts = Array.from(container.querySelectorAll(".notifyx:not([data-removing])"));
+  private static updateStackLayout(
+    container: HTMLElement,
+    position: string,
+  ): void {
+    const toasts = Array.from(
+      container.querySelectorAll<HTMLElement>(".notifyx:not([data-removing])"),
+    );
     const isTop = position.includes("top");
+
     toasts.forEach((el, idx) => {
       const indexFromNewest = toasts.length - 1 - idx;
       const scale = 1 - indexFromNewest * 0.05;
       const yOffset = (isTop ? 1 : -1) * indexFromNewest * 16;
+
       el.style.transform = `translateY(${yOffset}px) scale(${scale})`;
       el.style.zIndex = String(100 - indexFromNewest);
+
       if (indexFromNewest > 3) {
         el.style.opacity = "0";
         el.style.pointerEvents = "none";
       } else {
-        el.style.opacity = indexFromNewest === 0 ? "1" : String(1 - indexFromNewest * 0.15);
+        el.style.opacity =
+          indexFromNewest === 0 ? "1" : String(1 - indexFromNewest * 0.15);
         el.style.pointerEvents = indexFromNewest === 0 ? "auto" : "none";
       }
     });
   }
+
   // ─── Public API ───────────────────────────────────────────────────────────
+
   /**
    * Show a toast. Returns the toast element for imperative control.
    * @public
    */
-  static show(options) {
-    const opts = { ...DEFAULT_OPTIONS, ...globalDefaults, animation: "spring", ...options };
+  public static show(options: ToastOptions): HTMLElement {
+    const opts = {
+      ...DEFAULT_OPTIONS,
+      ...globalDefaults,
+      animation: "spring" as AnimationPreset,
+      ...options,
+    } as NormalizedToastOptions;
     if (globalTheme !== "auto" && !opts.theme) opts.theme = globalTheme;
-    if (!opts.id) opts.id = `nx-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    if (!opts.id)
+      opts.id = `nx-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+    // Dedup by ID — pulse existing toast
     if (opts.id && activeToastIds.has(opts.id)) {
-      const existing = activeToastIds.get(opts.id);
-      this.pulse(existing);
+      const existing = activeToastIds.get(opts.id)!;
+      AnimationEngine.pulse(existing);
       return existing;
     }
+
     const container = getContainer(opts.position);
     this.enforceMaxToasts(container, opts.maxToasts);
+
     const el = this.createToastElement(opts);
     container.appendChild(el);
     if (opts.id) {
       activeToastIds.set(opts.id, el);
       this.attachGestures(el, opts.id);
     }
+
+    // Set initial state before the next frame applies the real stack state
     el.style.opacity = "0";
     el.style.transform = `translateY(${opts.position.includes("top") ? "-20px" : "20px"}) scale(0.9)`;
+
     requestAnimationFrame(() => {
       this.updateStackLayout(container, opts.position);
     });
+
     if (opts.priority === "critical") {
       setTimeout(() => {
-        this.pulse(el);
-        const focusable = el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        AnimationEngine.shake(el);
+        const focusable = el.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
         if (focusable.length) {
-          const first = focusable[0];
-          const last = focusable[focusable.length - 1];
+          const first = focusable[0] as HTMLElement;
+          const last = focusable[focusable.length - 1] as HTMLElement;
           first.focus();
           el.addEventListener("keydown", (e) => {
             if (e.key === "Tab") {
@@ -442,71 +530,126 @@ class NotifyX {
         }
       }, 650);
     }
+
     this.setupAutoDismiss(el, opts);
     return el;
   }
+
   /** @public */
-  static success(msg, options) {
+  public static success(
+    msg: string,
+    options?: Partial<ToastOptions>,
+  ): HTMLElement {
     return this.show({ ...options, message: msg, type: "success" });
   }
+
   /** @public */
-  static error(msg, options) {
+  public static error(
+    msg: string,
+    options?: Partial<ToastOptions>,
+  ): HTMLElement {
     return this.show({ ...options, message: msg, type: "error" });
   }
+
   /** @public */
-  static warning(msg, options) {
+  public static warning(
+    msg: string,
+    options?: Partial<ToastOptions>,
+  ): HTMLElement {
     return this.show({ ...options, message: msg, type: "warning" });
   }
+
   /** @public */
-  static info(msg, options) {
+  public static info(
+    msg: string,
+    options?: Partial<ToastOptions>,
+  ): HTMLElement {
     return this.show({ ...options, message: msg, type: "info" });
   }
+
   /** @public */
-  static ai(msg, options) {
-    const aiOpts = { ...options?.ai };
+  public static ai(
+    msg: string,
+    options?: Partial<ToastOptions> & {
+      agentName?: string;
+      confidence?: number;
+      showCursor?: boolean;
+    },
+  ): HTMLElement {
+    const aiOpts: AIMetadata = { ...options?.ai };
     if (options?.agentName) aiOpts.model = options.agentName;
     if (options?.confidence) aiOpts.confidence = options.confidence;
     if (options?.showCursor) aiOpts.streaming = true;
-    return this.show({ ...options, message: msg, type: "ai", ai: Object.keys(aiOpts).length > 0 ? aiOpts : void 0 });
+
+    return this.show({
+      ...options,
+      message: msg,
+      type: "ai",
+      ai: Object.keys(aiOpts).length > 0 ? aiOpts : undefined,
+    });
   }
+
   /**
    * Show a centered loading toast. Dismiss with `dismissLoading()`.
    * @public
    */
-  static loading(msg, options) {
+  public static loading(msg: string, options?: Partial<ToastOptions>): void {
     if (activeLoadingToast) {
-      this.removeToast(activeLoadingToast, {});
+      this.removeToast(activeLoadingToast, {} as NormalizedToastOptions);
       activeLoadingToast = null;
     }
-    const opts = { ...DEFAULT_OPTIONS, animation: "fade", ...options, message: msg, type: "info", duration: 0, showProgress: false, dismissible: false, position: "center" };
-    const container = getContainer("center");
+    const opts = {
+      ...DEFAULT_OPTIONS,
+      animation: "fade" as AnimationPreset,
+      ...options,
+      message: msg,
+      type: "info" as ToastType,
+      duration: 0,
+      showProgress: false,
+      dismissible: false,
+      position: "center" as Position,
+    } as NormalizedToastOptions;
+    const container = getContainer("center" as Position);
     const el = this.createLoaderElement(opts);
     container.appendChild(el);
+
     el.style.opacity = "0";
     el.style.transform = `translateY(20px) scale(0.9)`;
     requestAnimationFrame(() => {
       this.updateStackLayout(container, "center");
     });
+
     activeLoadingToast = el;
   }
+
   /** @public */
-  static dismissLoading() {
+  public static dismissLoading(): void {
     if (activeLoadingToast) {
-      this.removeToast(activeLoadingToast, {});
+      this.removeToast(activeLoadingToast, {} as NormalizedToastOptions);
       activeLoadingToast = null;
     }
   }
+
   /**
    * Promise-based toast — loading → success | error.
    * @public
    */
+
   /**
    * Shows a loading toast, then auto-transitions to success or error.
    * Perfect for API calls, file uploads, form submissions.
    */
-  static promise(promiseOrFn, options) {
+  static promise<T>(
+    promiseOrFn: Promise<T> | (() => Promise<T>),
+    options: PromiseOptions<T>,
+  ): Promise<T> {
     const id = options.id ?? `promise-${Date.now()}`;
-    const loadingOpts = typeof options.loading === "string" ? { message: options.loading } : options.loading;
+    const loadingOpts =
+      typeof options.loading === "string"
+        ? { message: options.loading }
+        : options.loading;
+
+    // Show loading toast
     NotifyX.show({
       ...loadingOpts,
       type: "loading",
@@ -514,36 +657,58 @@ class NotifyX {
       dismissible: false,
       id,
       position: options.position,
-      animation: options.animation
+      animation: options.animation,
     });
+
     const p = typeof promiseOrFn === "function" ? promiseOrFn() : promiseOrFn;
-    return p.then((data) => {
-      const msg = typeof options.success === "function" ? options.success(data) : typeof options.success === "string" ? options.success : typeof options.success.message === "function" ? options.success.message(data) : options.success.message;
-      NotifyX.update(id, {
-        message: msg,
-        type: "success",
-        duration: 4e3,
-        dismissible: true
+
+    return p
+      .then((data) => {
+        const msg =
+          typeof options.success === "function"
+            ? options.success(data)
+            : typeof options.success === "string"
+              ? options.success
+              : typeof options.success.message === "function"
+                ? options.success.message(data)
+                : options.success.message;
+
+        NotifyX.update(id, {
+          message: msg as string,
+          type: "success",
+          duration: 4000,
+          dismissible: true,
+        });
+        return data;
+      })
+      .catch((err) => {
+        const msg =
+          typeof options.error === "function"
+            ? options.error(err)
+            : typeof options.error === "string"
+              ? options.error
+              : typeof options.error.message === "function"
+                ? options.error.message(err)
+                : options.error.message;
+
+        NotifyX.update(id, {
+          message: msg as string,
+          type: "error",
+          duration: 5000,
+          dismissible: true,
+        });
+        throw err;
       });
-      return data;
-    }).catch((err) => {
-      const msg = typeof options.error === "function" ? options.error(err) : typeof options.error === "string" ? options.error : typeof options.error.message === "function" ? options.error.message(err) : options.error.message;
-      NotifyX.update(id, {
-        message: msg,
-        type: "error",
-        duration: 5e3,
-        dismissible: true
-      });
-      throw err;
-    });
   }
+
   /**
    * Shows an AI-typing-style toast that streams text chunk by chunk.
    * Returns a StreamController to push chunks from LLM streams.
    */
-  static stream(options) {
+  static stream(options: StreamOptions): StreamController {
     const id = options.id ?? `stream-${Date.now()}`;
     let accumulated = "";
+
     NotifyX.show({
       message: options.loadingMessage ?? "",
       title: options.title,
@@ -553,53 +718,56 @@ class NotifyX {
       id,
       position: options.position,
       animation: options.animation,
-      ai: { ...options.ai, streaming: true }
+      ai: { ...options.ai, streaming: true },
     });
+
     return {
-      update(chunk) {
+      update(chunk: string) {
         accumulated += chunk;
         options.onChunk?.(chunk, accumulated);
         NotifyX.update(id, {
           message: accumulated,
-          type: "ai"
+          type: "ai",
         });
       },
-      set(message) {
+      set(message: string) {
         accumulated = message;
-        NotifyX.update(id, { message, type: "ai" });
+        NotifyX.update(id, { message: message, type: "ai" });
       },
-      success(message, opts) {
+      success(message: string, opts?: Partial<ToastOptions>) {
         options.onComplete?.(accumulated);
         NotifyX.update(id, {
           message,
           type: "success",
-          duration: 4e3,
+          duration: 4000,
           dismissible: true,
           ai: { streaming: false },
-          ...opts
+          ...opts,
         });
       },
-      error(message, opts) {
+      error(message: string, opts?: Partial<ToastOptions>) {
         NotifyX.update(id, {
           message,
           type: "error",
-          duration: 5e3,
+          duration: 5000,
           dismissible: true,
           ai: { streaming: false },
-          ...opts
+          ...opts,
         });
       },
       dismiss() {
         NotifyX.dismiss(id);
-      }
+      },
     };
   }
+
   /**
    * Update an existing toast by ID (message, type, anything).
    */
-  static update(id, options) {
+  static update(id: string, options: Partial<ToastOptions>): void {
     const el = activeToastIds.get(id);
     if (!el) return;
+
     if (options.message) {
       const msgEl = el.querySelector(".notifyx-msg");
       if (msgEl) {
@@ -608,6 +776,8 @@ class NotifyX {
         } else {
           msgEl.textContent = options.message;
         }
+
+        // Handle streaming state updates
         if (options.ai && "streaming" in options.ai) {
           if (options.ai.streaming) {
             el.setAttribute("data-streaming", "true");
@@ -615,6 +785,7 @@ class NotifyX {
             el.removeAttribute("data-streaming");
           }
         }
+
         if (el.getAttribute("data-streaming") === "true") {
           const cursor = document.createElement("span");
           cursor.className = "notifyx-stream-cursor";
@@ -622,6 +793,7 @@ class NotifyX {
         }
       }
     }
+
     if (options.title) {
       let titleEl = el.querySelector(".notifyx-title");
       if (!titleEl) {
@@ -632,69 +804,97 @@ class NotifyX {
       }
       titleEl.textContent = options.title;
     }
+
     if (options.type) {
       const classList = el.classList;
       classList.forEach((cls) => {
-        if (cls.startsWith("notifyx-") && !cls.match(/notifyx-(entering|exiting|stack-shifting|loading|streaming|stream-done)/)) {
-          if (["success", "error", "warning", "info", "ai", "default"].includes(cls.replace("notifyx-", ""))) {
+        if (
+          cls.startsWith("notifyx-") &&
+          !cls.match(
+            /notifyx-(entering|exiting|stack-shifting|loading|streaming|stream-done)/,
+          )
+        ) {
+          if (
+            ["success", "error", "warning", "info", "ai", "default"].includes(
+              cls.replace("notifyx-", ""),
+            )
+          ) {
             classList.remove(cls);
           }
         }
       });
       el.classList.add(`notifyx-${options.type}`);
+
       const iconEl = el.querySelector(".notifyx-icon");
       if (iconEl && !options.icon) {
         if (options.type === "ai") {
           iconEl.innerHTML = SVG_ICONS.ai;
         } else {
-          iconEl.innerHTML = SVG_ICONS[options.type] || SVG_ICONS.default;
+          iconEl.innerHTML =
+            SVG_ICONS[options.type as ToastType] || SVG_ICONS.default;
         }
       }
     }
+
     if (options.icon) {
       const iconEl = el.querySelector(".notifyx-icon");
       if (iconEl) {
-        iconEl.innerHTML = typeof options.icon === "string" ? `<span style="font-size:1.1em">${options.icon}</span>` : "";
+        iconEl.innerHTML =
+          typeof options.icon === "string"
+            ? `<span style="font-size:1.1em">${options.icon}</span>`
+            : "";
         if (options.icon instanceof HTMLElement) {
           iconEl.appendChild(options.icon);
         }
       }
     }
-    if (options.duration !== void 0 && options.duration > 0) {
-      this.setupAutoDismiss(el, { ...DEFAULT_OPTIONS, ...options });
+
+    // Auto dismiss if duration > 0
+    if (options.duration !== undefined && options.duration > 0) {
+      this.setupAutoDismiss(el, {
+        ...DEFAULT_OPTIONS,
+        ...options,
+      } as NormalizedToastOptions);
     }
   }
+
   /**
    * Pause all running timers (e.g., when showing a modal).
    */
-  static pauseAll() {
+  static pauseAll(): void {
     activeToastIds.forEach((el) => {
-      const pause = el.__notifyxPauseTimer;
+      const pause = (el as NotifyXElement).__notifyxPauseTimer;
       if (pause) pause();
     });
   }
+
   /**
    * Resume all paused timers.
    */
-  static resumeAll() {
+  static resumeAll(): void {
     activeToastIds.forEach((el) => {
-      const resume = el.__notifyxResumeTimer;
+      const resume = (el as NotifyXElement).__notifyxResumeTimer;
       if (resume) resume();
     });
   }
+
   /**
    * Show multiple toasts as a grouped batch with shared dismiss.
    */
-  static batch(toasts, sharedOptions) {
+  static batch(
+    toasts: ToastOptions[],
+    sharedOptions?: Partial<ToastOptions>,
+  ): string[] {
     return toasts.map((t) => {
       const el = this.show({ ...sharedOptions, ...t });
       return el.getAttribute("data-id") || "";
     });
   }
+
   /**
    * Change global default theme at runtime.
    */
-  static setTheme(theme) {
+  static setTheme(theme: ThemePreset): void {
     globalTheme = theme;
     if (typeof document !== "undefined") {
       if (theme === "auto") {
@@ -704,39 +904,54 @@ class NotifyX {
       }
     }
   }
+
   /**
    * Set global defaults once.
    */
-  static configure(defaults) {
+  static configure(defaults: Partial<ToastOptions>): void {
     globalDefaults = { ...globalDefaults, ...defaults };
   }
+
   /**
    * Dismiss a toast by ID string or HTMLElement reference.
    * @public
    */
-  static dismiss(idOrEl) {
+  public static dismiss(idOrEl: string | HTMLElement): void {
     if (typeof idOrEl === "string") {
       const el = activeToastIds.get(idOrEl);
-      if (el) this.removeToast(el, {});
+      if (el) this.removeToast(el, {} as NormalizedToastOptions);
     } else if (idOrEl?.classList.contains("notifyx")) {
-      this.removeToast(idOrEl, {});
+      this.removeToast(idOrEl, {} as NormalizedToastOptions);
     }
   }
+
   /**
    * Clear all active toasts.
    * @public
    */
-  static clear() {
-    document.querySelectorAll(".notifyx").forEach((el) => {
-      this.removeToast(el, {});
+  public static clear(): void {
+    document.querySelectorAll<HTMLElement>(".notifyx").forEach((el) => {
+      this.removeToast(el, {} as NormalizedToastOptions);
     });
     activeToastIds.clear();
     activeLoadingToast = null;
+    globalQueue.clear();
+  }
+
+  // ─── Advanced accessors ───────────────────────────────────────────────────
+
+  /** Access the global priority queue for advanced use cases. */
+  static get queue(): ToastQueue {
+    return globalQueue;
+  }
+
+  /** Access AnimationEngine for advanced animation control. */
+  static get animation(): typeof AnimationEngine {
+    return AnimationEngine;
+  }
+
+  /** Access StreamBridge for streaming utilities. */
+  static get stream_bridge(): typeof StreamBridge {
+    return StreamBridge;
   }
 }
-
-if (typeof window !== "undefined") {
-  window.NotifyX = NotifyX;
-}
-
-export { NotifyX as default };

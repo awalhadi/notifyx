@@ -1,399 +1,594 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NotifyX - Premium Toast Notifications Demo</title>
-  <link rel="stylesheet" href="../dist/notifyx.min.css" />
+  <title>NotifyX 3.0 — AI-Native Toast Notifications</title>
+  <meta name="description" content="The most visually polished, AI-native toast notification library. Zero deps, &lt;7KB gzipped." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../dist/notifyx.min.css?v=2" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #060610;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --text: #f1f5f9;
+      --muted: rgba(255,255,255,0.45);
+      --accent: #7c3aed;
+      --accent2: #3b82f6;
+      --accent3: #10b981;
+      --radius: 18px;
     }
 
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated mesh background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(124,58,237,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(59,130,246,0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 60% at 50% 90%, rgba(16,185,129,0.10) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
     }
 
     .container {
-      max-width: 800px;
-      width: 100%;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
-      padding: 3rem;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 80px 0 60px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #a78bfa;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 100px;
+      padding: 5px 14px;
+      margin-bottom: 24px;
     }
 
     h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #1a202c;
-      margin-bottom: 0.5rem;
-      text-align: center;
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.08;
+      background: linear-gradient(135deg, #f1f5f9 30%, #a78bfa 60%, #60a5fa 85%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
     }
 
-    .subtitle {
-      text-align: center;
-      color: #718096;
+    .hero-sub {
       font-size: 1.1rem;
-      margin-bottom: 2.5rem;
+      color: var(--muted);
+      max-width: 540px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
     }
 
+    .badges {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface);
+    }
+
+    /* ── Section ── */
     .section {
-      margin-bottom: 2rem;
+      margin-bottom: 48px;
     }
 
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #2d3748;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid #e2e8f0;
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
     }
 
-    .button-grid {
+    .section-header h2 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Button grid ── */
+    .btn-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
     }
 
-    button {
-      padding: 0.875rem 1.5rem;
-      font-size: 0.95rem;
+    .btn {
+      position: relative;
+      padding: 12px 18px;
+      font-size: 13px;
       font-weight: 600;
-      border: none;
+      font-family: inherit;
+      border: 1px solid var(--border);
       border-radius: 12px;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.22s cubic-bezier(0.34, 1.2, 0.64, 1);
+      background: var(--surface);
+      color: var(--text);
+      text-align: left;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.2s;
+      border-radius: inherit;
     }
 
-    button:active {
-      transform: translateY(0);
+    .btn:hover { transform: translateY(-2px) scale(1.02); border-color: rgba(255,255,255,0.18); }
+    .btn:hover::before { opacity: 1; }
+    .btn:active { transform: translateY(0) scale(0.98); }
+
+    .btn-success::before { background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.08)); }
+    .btn-error::before   { background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(220,38,38,0.08)); }
+    .btn-warning::before { background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(217,119,6,0.08)); }
+    .btn-info::before    { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(37,99,235,0.08)); }
+    .btn-ai::before      { background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(59,130,246,0.10)); }
+    .btn-stream::before  { background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(16,185,129,0.10)); }
+    .btn-danger::before  { background: linear-gradient(135deg, rgba(220,38,38,0.15), rgba(127,29,29,0.10)); }
+
+    .btn-icon { font-size: 16px; line-height: 1; }
+
+    /* ── Code block ── */
+    .code-card {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
     }
 
-    .btn-success {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
     }
 
-    .btn-error {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: white;
-    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
 
-    .btn-warning {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: white;
-    }
-
-    .btn-info {
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: white;
-    }
-
-    .btn-default {
-      background: linear-gradient(135deg, #64748b, #475569);
-      color: white;
-    }
-
-    .btn-loading {
-      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-      color: white;
-    }
-
-    .btn-promise {
-      background: linear-gradient(135deg, #ec4899, #db2777);
-      color: white;
-    }
-
-    .btn-clear {
-      background: linear-gradient(135deg, #dc2626, #b91c1c);
-      color: white;
-    }
-
-    .code-block {
-      background: #1e293b;
+    pre {
+      padding: 20px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
       color: #e2e8f0;
-      padding: 1rem;
-      border-radius: 8px;
-      font-family: "Courier New", monospace;
-      font-size: 0.875rem;
-      margin-top: 1rem;
       overflow-x: auto;
     }
 
+    .kw { color: #c084fc; }
+    .fn { color: #60a5fa; }
+    .str { color: #86efac; }
+    .cm { color: rgba(255,255,255,0.3); }
+
+    /* ── Features grid ── */
     .features {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
-      margin-top: 1.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
     }
 
     .feature {
-      padding: 1rem;
-      background: #f7fafc;
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
+      padding: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: border-color 0.2s, transform 0.2s;
     }
 
-    .feature h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #2d3748;
-      margin-bottom: 0.5rem;
-    }
+    .feature:hover { border-color: rgba(255,255,255,0.18); transform: translateY(-2px); }
 
-    .feature p {
-      font-size: 0.875rem;
-      color: #718096;
-    }
+    .feature-icon { font-size: 22px; margin-bottom: 10px; }
+    .feature h3 { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+    .feature p { font-size: 12px; color: var(--muted); line-height: 1.5; }
 
-    @media (max-width: 640px) {
-      .container {
-        padding: 2rem 1.5rem;
-      }
-
-      h1 {
-        font-size: 2rem;
-      }
-
-      .button-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-      }
-
-      .container {
-        background: rgba(30, 41, 59, 0.95);
-      }
-
-      h1 {
-        color: #f1f5f9;
-      }
-
-      .subtitle {
-        color: #cbd5e1;
-      }
-
-      .section-title {
-        color: #e2e8f0;
-        border-bottom-color: #475569;
-      }
-
-      .feature {
-        background: #1e293b;
-        border-color: #475569;
-      }
-
-      .feature h3 {
-        color: #e2e8f0;
-      }
-
-      .feature p {
-        color: #94a3b8;
-      }
+    @media (max-width: 600px) {
+      .btn-grid { grid-template-columns: 1fr 1fr; }
+      h1 { font-size: 2rem; }
     }
   </style>
 </head>
-
 <body>
-
-  
   <div class="container">
-    <h1>🎉 NotifyX</h1>
-    <p class="subtitle">
-      Premium Toast Notifications with Beautiful Glassmorphism Design
-    </p>
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-badge">✦ New — v3.0</div>
+      <h1>NotifyX</h1>
+      <p class="hero-sub">The AI-native toast library. Streaming, priority queues, action buttons, and 5 animation styles — in under 5 KB.</p>
+      <div class="badges">
+        <span class="badge">⚡ &lt; 5 KB gzipped</span>
+        <span class="badge">🔗 Zero dependencies</span>
+        <span class="badge">🤖 AI streaming</span>
+        <span class="badge">🌙 Auto dark mode</span>
+        <span class="badge">♿ ARIA accessible</span>
+        <span class="badge">📦 TypeScript</span>
+      </div>
+    </div>
 
-
-
+    <!-- Basic -->
     <div class="section">
-      <h2 class="section-title">Basic Notifications</h2>
-      <div class="button-grid">
-        <button class="btn-success" onclick="NotifyX.success('Operation completed successfully! 🎉')">
-          Success
+      <div class="section-header">
+        <h2>Basic notifications</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="btn-grid">
+        <button id="btn-success" class="btn btn-success" onclick="NotifyX.success('Deployment complete! All 12 services healthy.', { title: 'Success' })">
+          <span class="btn-icon">✅</span> Success
         </button>
-        <button class="btn-error" onclick="NotifyX.error('Something went wrong! Please try again.')">
-          Error
+        <button id="btn-error" class="btn btn-error" onclick="NotifyX.error('Connection refused on port 5432.', { title: 'Database Error' })">
+          <span class="btn-icon">❌</span> Error
         </button>
-        <button class="btn-warning" onclick="NotifyX.warning('Please review your changes before proceeding.')">
-          Warning
+        <button id="btn-warning" class="btn btn-warning" onclick="NotifyX.warning('Token expires in 5 minutes. Refresh soon.', { title: 'Auth Warning' })">
+          <span class="btn-icon">⚠️</span> Warning
         </button>
-        <button class="btn-info" onclick="NotifyX.info('Here is some helpful information for you.')">
-          Info
+        <button id="btn-info" class="btn btn-info" onclick="NotifyX.info('Build #491 queued. Estimated 2m 30s.', { title: 'CI/CD' })">
+          <span class="btn-icon">ℹ️</span> Info
+        </button>
+        <button id="btn-default" class="btn" onclick="NotifyX.show({ message: 'System maintenance at 02:00 UTC.', duration: 4000 })">
+          <span class="btn-icon">📢</span> Default
         </button>
       </div>
     </div>
 
+    <!-- Actions & Options -->
     <div class="section">
-      <h2 class="section-title">Advanced Features</h2>
-      <div class="button-grid">
-        <button class="btn-loading" onclick="NotifyX.loading('Processing your request...')">
-          Loading
-        </button>
-        <button class="btn-promise" onclick="testPromise()">
-          Promise Toast
-        </button>
-        <button class="btn-default" onclick="showCustomIcon()">
-          Custom Icon
-        </button>
-        <button class="btn-clear" onclick="NotifyX.clear()">Clear All</button>
+      <div class="section-header">
+        <h2>Actions &amp; options</h2>
+        <div class="section-line"></div>
       </div>
-    </div>
-
-    <div class="section">
-      <h2 class="section-title">Positions Demo</h2>
-      <div class="button-grid">
-        <button class="btn-info" onclick="NotifyX.info('Top Right', { position: 'top-right' })">
-          Top Right
+      <div class="btn-grid">
+        <button id="btn-with-actions" class="btn btn-error" onclick="showWithActions()">
+          <span class="btn-icon">🎯</span> With Actions
         </button>
-        <button class="btn-info" onclick="NotifyX.info('Top Left', { position: 'top-left' })">
-          Top Left
+        <button id="btn-persistent" class="btn btn-warning" onclick="showPersistent()">
+          <span class="btn-icon">📌</span> Persistent
         </button>
-        <button class="btn-info" onclick="NotifyX.info('Top Center', { position: 'top-center' })">
-          Top Center
+        <button id="btn-no-progress" class="btn btn-info" onclick="NotifyX.info('No progress bar here', { showProgress: false, duration: 3000 })">
+          <span class="btn-icon">🚫</span> No Progress
         </button>
-        <button class="btn-info" onclick="NotifyX.info('Bottom Right', { position: 'bottom-right' })">
-          Bottom Right
+        <button id="btn-custom-icon" class="btn btn-success" onclick="NotifyX.success('Payment of $49.99 received!', { icon: '💰', duration: 4000 })">
+          <span class="btn-icon">🎨</span> Custom Icon
         </button>
-        <button class="btn-info" onclick="NotifyX.info('Bottom Left', { position: 'bottom-left' })">
-          Bottom Left
-        </button>
-        <button class="btn-info" onclick="NotifyX.info('Bottom Center', { position: 'bottom-center' })">
-          Bottom Center
+        <button id="btn-dedup" class="btn btn-info" onclick="NotifyX.info('Only one of me!', { id: 'unique-toast', duration: 6000 })">
+          <span class="btn-icon">🔑</span> Deduplicated
         </button>
       </div>
     </div>
 
+    <!-- AI & Streaming -->
     <div class="section">
-      <h2 class="section-title">✨ Key Features</h2>
+      <div class="section-header">
+        <h2>🤖 AI &amp; Streaming</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="btn-grid">
+        <button id="btn-ai" class="btn btn-ai" onclick="showAIToast()">
+          <span class="btn-icon">🧠</span> AI Toast
+        </button>
+        <button id="btn-stream" class="btn btn-stream" onclick="showStreamToast()">
+          <span class="btn-icon">⚡</span> Stream Toast
+        </button>
+        <button id="btn-agent" class="btn btn-ai" onclick="showAgentToast()">
+          <span class="btn-icon">🤖</span> Agent Badge
+        </button>
+        <button id="btn-confidence" class="btn btn-ai" onclick="showConfidenceToast()">
+          <span class="btn-icon">📊</span> Confidence Bar
+        </button>
+      </div>
+    </div>
+
+    <!-- Animations -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Animation styles</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="btn-grid">
+        <button id="btn-spring" class="btn btn-info" onclick="NotifyX.info('Spring physics animation', { animation: 'spring' })">
+          <span class="btn-icon">🌀</span> Spring
+        </button>
+        <button id="btn-slide" class="btn btn-info" onclick="NotifyX.info('Slide in from right', { animation: 'slide' })">
+          <span class="btn-icon">➡️</span> Slide
+        </button>
+        <button id="btn-fade" class="btn btn-info" onclick="NotifyX.info('Smooth fade entrance', { animation: 'fade' })">
+          <span class="btn-icon">🌫️</span> Fade
+        </button>
+        <button id="btn-zoom" class="btn btn-info" onclick="NotifyX.info('Zoom with elastic bounce', { animation: 'zoom' })">
+          <span class="btn-icon">🔍</span> Zoom
+        </button>
+        <button id="btn-flip" class="btn btn-info" onclick="NotifyX.info('3D flip entrance', { animation: 'flip' })">
+          <span class="btn-icon">🔄</span> Flip
+        </button>
+      </div>
+    </div>
+
+    <!-- Positions -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Positions</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="btn-grid">
+        <button id="btn-tr" class="btn btn-success" onclick="NotifyX.success('Top Right', { position: 'top-right' })"><span class="btn-icon">↗️</span> Top Right</button>
+        <button id="btn-tl" class="btn btn-success" onclick="NotifyX.success('Top Left', { position: 'top-left' })"><span class="btn-icon">↖️</span> Top Left</button>
+        <button id="btn-tc" class="btn btn-success" onclick="NotifyX.success('Top Center', { position: 'top-center' })"><span class="btn-icon">⬆️</span> Top Center</button>
+        <button id="btn-br" class="btn btn-success" onclick="NotifyX.success('Bottom Right', { position: 'bottom-right' })"><span class="btn-icon">↘️</span> Bottom Right</button>
+        <button id="btn-bl" class="btn btn-success" onclick="NotifyX.success('Bottom Left', { position: 'bottom-left' })"><span class="btn-icon">↙️</span> Bottom Left</button>
+        <button id="btn-bc" class="btn btn-success" onclick="NotifyX.success('Bottom Center', { position: 'bottom-center' })"><span class="btn-icon">⬇️</span> Bottom Center</button>
+      </div>
+    </div>
+
+    <!-- Async -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Async &amp; loading</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="btn-grid">
+        <button id="btn-loading" class="btn btn-ai" onclick="NotifyX.loading('Processing request…')">
+          <span class="btn-icon">⏳</span> Loading
+        </button>
+        <button id="btn-dismiss-loading" class="btn" onclick="NotifyX.dismissLoading()">
+          <span class="btn-icon">✖️</span> Dismiss Loading
+        </button>
+        <button id="btn-promise" class="btn btn-success" onclick="testPromise()">
+          <span class="btn-icon">🔮</span> Promise Toast
+        </button>
+        <button id="btn-clear" class="btn btn-danger" onclick="NotifyX.clear()">
+          <span class="btn-icon">🗑️</span> Clear All
+        </button>
+      </div>
+    </div>
+
+    <!-- Code -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Quick start</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="code-card">
+        <div class="code-header">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+        <pre><span class="cm">// Install</span>
+<span class="fn">npm</span> install notifyx
+
+<span class="cm">// Basic</span>
+<span class="kw">import</span> <span class="str">{ NotifyX }</span> <span class="kw">from</span> <span class="str">'notifyx'</span>;
+<span class="kw">import</span> <span class="str">'notifyx/style.css'</span>;
+
+NotifyX.<span class="fn">success</span>(<span class="str">'Deployed!'</span>, { title: <span class="str">'CI/CD'</span> });
+
+<span class="cm">// AI streaming (OpenAI / Anthropic)</span>
+<span class="kw">await</span> NotifyX.<span class="fn">stream</span>(openai.chat.completions.<span class="fn">stream</span>({…}), {
+  loadingMessage: <span class="str">'AI is thinking…'</span>,
+  onComplete: (text) => <span class="fn">console</span>.<span class="fn">log</span>(text),
+});
+
+<span class="cm">// Promise toast</span>
+<span class="kw">await</span> NotifyX.<span class="fn">promise</span>(<span class="fn">fetchData</span>(), {
+  loading: <span class="str">'Fetching…'</span>,
+  success: <span class="str">'Done!'</span>,
+  error: (e) => <span class="str">`Failed: </span>${e.message}<span class="str">`</span>,
+});
+
+<span class="cm">// With actions</span>
+NotifyX.<span class="fn">error</span>(<span class="str">'Deployment failed.'</span>, {
+  title: <span class="str">'Build #491'</span>,
+  actions: [
+    { label: <span class="str">'View Logs'</span>, onClick: () => <span class="fn">openLogs</span>() },
+    { label: <span class="str">'Retry'</span>, onClick: () => <span class="fn">retry</span>(), variant: <span class="str">'primary'</span> },
+  ],
+});</pre>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="section">
+      <div class="section-header">
+        <h2>What's new in v3</h2>
+        <div class="section-line"></div>
+      </div>
       <div class="features">
         <div class="feature">
-          <h3>🎨 Premium Design</h3>
-          <p>Beautiful glassmorphism with smooth animations</p>
+          <div class="feature-icon">🤖</div>
+          <h3>AI Streaming</h3>
+          <p>Pipe OpenAI, Anthropic, or any AsyncIterable directly into a toast.</p>
         </div>
         <div class="feature">
-          <h3>🪶 Lightweight</h3>
-          <p>Only 1.4KB gzipped</p>
+          <div class="feature-icon">🎯</div>
+          <h3>Action Buttons</h3>
+          <p>Primary, ghost, and danger variants. Auto-dismiss on click.</p>
         </div>
         <div class="feature">
-          <h3>📱 Responsive</h3>
-          <p>Perfect on all devices</p>
+          <div class="feature-icon">🔑</div>
+          <h3>ID Deduplication</h3>
+          <p>Same ID? Pulse the existing toast instead of spawning a duplicate.</p>
         </div>
         <div class="feature">
-          <h3>♿ Accessible</h3>
-          <p>Full ARIA support</p>
+          <div class="feature-icon">🎬</div>
+          <h3>5 Animations</h3>
+          <p>Spring · Slide · Fade · Zoom · Flip. Physics-based, GPU-accelerated.</p>
         </div>
         <div class="feature">
-          <h3>🌙 Dark Mode</h3>
-          <p>Auto dark mode ready</p>
+          <div class="feature-icon">🎨</div>
+          <h3>Theme System</h3>
+          <p>Light · Dark · Glass · Minimal · Neo — auto or manual.</p>
         </div>
         <div class="feature">
-          <h3>⚡ Promise Support</h3>
-          <p>Track async operations</p>
+          <div class="feature-icon">🧱</div>
+          <h3>Priority Queue</h3>
+          <p>Low · Normal · High · Critical. Smart ordering built-in.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">📋</div>
+          <h3>Title + Message</h3>
+          <p>Two-line toasts with a bold title and descriptive message.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">⚡</div>
+          <h3>&lt; 5 KB gzipped</h3>
+          <p>Zero runtime dependencies. Loads fast, runs faster.</p>
         </div>
       </div>
     </div>
-
-    <div class="code-block">
-      <div>// Basic Usage</div>
-      <div>NotifyX.success('Success!');</div>
-      <div>NotifyX.error('Error occurred');</div>
-      <div></div>
-      <div>// Promise Support</div>
-      <div>await NotifyX.promise(fetchData(), {</div>
-      <div>loading: 'Loading...',</div>
-      <div>success: 'Done!',</div>
-      <div>error: 'Failed!'</div>
-      <div>});</div>
-    </div>
   </div>
 
-  <script src="../dist/notifyx.min.js"></script>
+  <script src="../dist/notifyx.min.js?v=2"></script>
   <script>
-    // Promise toast demo
+    // Promise demo
     async function testPromise() {
-      const mockPromise = new Promise((resolve, reject) => {
-        setTimeout(() => {
-          Math.random() > 0.5
-            ? resolve("Success!")
-            : reject(new Error("Failed!"));
-        }, 2000);
-      });
-
-      try {
-        await NotifyX.promise(mockPromise, {
-          loading: "Processing your request...",
-          success: "Operation completed successfully!",
-          error: "Operation failed. Please try again.",
-        });
-      } catch (error) {
-        console.log("Promise rejected:", error);
-      }
-    }
-
-    // Custom icon demo
-    function showCustomIcon() {
-      NotifyX.success("Payment received!", {
-        icon: "💰",
-        duration: 4000,
-      });
-    }
-
-    // Show welcome message
-    setTimeout(() => {
-      NotifyX.info(
-        "Welcome to NotifyX! Try out the different notification types.",
-        {
-          duration: 5000,
-          position: "top-center",
-        }
+      const mock = new Promise((res, rej) =>
+        setTimeout(() => Math.random() > 0.4 ? res("data") : rej(new Error("Timeout")), 2200)
       );
-    }, 500);
+      try {
+        await NotifyX.promise(mock, {
+          loading: "Fetching user data…",
+          success: "User data loaded successfully!",
+          error: (e) => `Request failed: ${e.message}`,
+        });
+      } catch {}
+    }
+
+    // With actions
+    function showWithActions() {
+      NotifyX.error("Deployment pipeline failed at step 3/7.", {
+        title: "Build #491 Failed",
+        duration: 0,
+        actions: [
+          { label: "View Logs", onClick: () => NotifyX.info("Opening logs…") },
+          { label: "Retry", onClick: () => NotifyX.success("Retrying build…"), variant: "primary" },
+        ],
+      });
+    }
+
+    // Persistent
+    function showPersistent() {
+      const t = NotifyX.warning("Action required: Review pending changes.", {
+        title: "Needs Review",
+        duration: 0,
+        actions: [{ label: "Dismiss", onClick: () => NotifyX.dismiss(t), variant: "ghost" }],
+      });
+    }
+
+    // AI toast
+    function showAIToast() {
+      NotifyX.ai("Analysis complete. Anomaly detected in cluster node-7. Confidence: 94%. Recommend immediate failover.", {
+        title: "AI Analysis",
+        duration: 6000,
+        showCursor: true,
+      });
+    }
+
+    // Stream toast (fake stream)
+    async function showStreamToast() {
+      const text = "Analyzing your codebase… Found 3 potential memory leaks in worker threads. Recommend using WeakRef for cache entries. Performance improvement estimated at 23%.";
+      const stream = NotifyX.stream({
+        title: "AI Analysis",
+        loadingMessage: "AI is analyzing…",
+        position: "top-right",
+        onComplete: (full) => console.log("Stream complete:", full.length, "chars"),
+      });
+
+      for (let i = 0; i < text.length; i += 4) {
+        stream.update(text.slice(i, i + 4));
+        await new Promise(r => setTimeout(r, 28));
+      }
+      stream.success(text, { duration: 7000 });
+    }
+
+    // Agent badge
+    function showAgentToast() {
+      NotifyX.ai("I've scheduled a daily backup at 03:00 UTC and enabled geo-redundancy across 3 regions.", {
+        agentName: "Orchestrator",
+        title: "Task Completed",
+        duration: 6000,
+      });
+    }
+
+    // Confidence
+    function showConfidenceToast() {
+      NotifyX.ai("Root cause identified: memory pressure in shard-4 due to uncached query patterns.", {
+        title: "Root Cause Analysis",
+        confidence: 0.91,
+        duration: 7000,
+      });
+    }
+
+    // Welcome
+    setTimeout(() => {
+      NotifyX.success("NotifyX v3.0 loaded! Try the buttons below.", {
+        title: "Welcome 🎉",
+        position: "top-center",
+        duration: 5000,
+        animation: "spring",
+      });
+    }, 600);
   </script>
-
-  <div class="notifyx-container" data-position="top-center" aria-label="Notifications top center">
-    <div class="notifyx notifyx-info notifyx-exit" role="alert" aria-live="polite" aria-atomic="true">
-      <div class="notifyx-content">
-        <div class="notifyx-content-and-icon">
-          <div class="notifyx-icon" aria-hidden="true">ℹ</div>
-          <span class="notifyx-msg">Welcome to NotifyX! Try out the different notification types.</span>
-        </div>
-        <button class="notifyx-close" aria-label="Close notification" type="button"></button>
-      </div>
-      <div class="notifyx-progress-bar" style="width: 0%; transition: width 3938ms linear;"></div>
-    </div>
-  </div>
-
-  <div class="notifyx-container" data-position="center" aria-label="Notifications center">
-    <div class="notifyx notifyx-info notifyx-enter" role="status" aria-live="polite" aria-busy="true">
-      <div class="notifyx-loader">
-        <div class="notifyx-spinner" aria-label="Loading"></div>
-        <span class="notifyx-msg">Processing your request...</span>
-      </div>
-    </div>
-  </div>
 </body>
-
 </html>

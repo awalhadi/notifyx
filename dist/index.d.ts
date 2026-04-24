@@ -1,182 +1,225 @@
-/**
- * CSS animation class names
- * @public
- */
-export declare const ANIMATION_CLASSES: {
-    readonly enter: "notifyx-spring-enter";
-    readonly exit: "notifyx-spring-exit";
-    readonly slideEnter: "notifyx-slide-enter";
-    readonly slideExit: "notifyx-slide-exit";
-};
+export declare interface AIMetadata {
+    model?: string;
+    toolName?: string;
+    confidence?: number;
+    streaming?: boolean;
+    tokens?: number;
+    latencyMs?: number;
+}
+
+export declare type AnimationPreset = 'spring' | 'slide' | 'bloom' | 'flip' | 'fade' | 'none';
 
 /**
- * Default toast configuration
- * @public
- */
-export declare const DEFAULT_OPTIONS: {
-    readonly type: "default";
-    readonly duration: 3000;
-    readonly showProgress: true;
-    readonly showIcon: true;
-    readonly pauseOnHover: true;
-    readonly position: "top-right";
-    readonly dismissible: true;
-    readonly maxToasts: 5;
-};
-
-/**
- * NotifyX - Modern toast notification library
+ * NotifyX — AI-native, premium toast notification library.
+ * Zero dependencies · Framework-agnostic · TypeScript-first
  * @public
  */
 declare class NotifyX {
-    /**
-     * Creates the toast DOM element
-     * @private
-     */
+    static readonly POSITIONS: {
+        readonly TOP_RIGHT: "top-right";
+        readonly TOP_LEFT: "top-left";
+        readonly TOP_CENTER: "top-center";
+        readonly BOTTOM_RIGHT: "bottom-right";
+        readonly BOTTOM_LEFT: "bottom-left";
+        readonly BOTTOM_CENTER: "bottom-center";
+        readonly CENTER: "center";
+    };
+    static readonly ANIMATION_PRESETS: {
+        readonly SPRING: "spring";
+        readonly SLIDE: "slide";
+        readonly BLOOM: "bloom";
+        readonly FLIP: "flip";
+        readonly FADE: "fade";
+        readonly NONE: "none";
+    };
+    static readonly THEMES: {
+        readonly AUTO: "auto";
+        readonly LIGHT: "light";
+        readonly DARK: "dark";
+        readonly GLASS: "glass";
+        readonly MINIMAL: "minimal";
+        readonly BRUTAL: "brutal";
+    };
+    static readonly DEFAULT_OPTIONS: {
+        readonly type: "info";
+        readonly duration: 3000;
+        readonly position: "top-right";
+        readonly dismissible: true;
+        readonly maxToasts: 5;
+        readonly animation: "spring";
+        readonly theme: "auto";
+        readonly pauseOnHover: true;
+        readonly pauseOnFocus: false;
+        readonly priority: "normal";
+    };
+    /** @private */
+    private static pulse;
+    /** @private */
+    private static attachGestures;
+    /** @private */
     private static createToastElement;
-    /**
-     * Creates loader element for loading state
-     * @private
-     */
+    /** @private */
     private static createLoaderElement;
-    /**
-     * Creates simple close button (just × icon)
-     * @private
-     */
-    private static createCloseButton;
-    /**
-     * Removes a toast with exit animation
-     * @private
-     */
+    /** @private */
     private static removeToast;
-    /**
-     * Removes container if it has no children
-     * @private
-     */
-    private static cleanupEmptyContainer;
-    /**
-     * FIXED: Manages auto-dismiss timer with pause on hover
-     * @private
-     */
+    /** @private */
     private static setupAutoDismiss;
-    /**
-     * Enforces maximum toast limit
-     * @private
-     */
+    /** @private */
     private static enforceMaxToasts;
+    /** @private */
+    private static updateStackLayout;
     /**
-     * Display a toast notification
+     * Show a toast. Returns the toast element for imperative control.
      * @public
      */
-    static show(options: ToastOptions): void;
+    static show(options: ToastOptions): HTMLElement;
+    /** @public */
+    static success(msg: string, options?: Partial<ToastOptions>): HTMLElement;
+    /** @public */
+    static error(msg: string, options?: Partial<ToastOptions>): HTMLElement;
+    /** @public */
+    static warning(msg: string, options?: Partial<ToastOptions>): HTMLElement;
+    /** @public */
+    static info(msg: string, options?: Partial<ToastOptions>): HTMLElement;
+    /** @public */
+    static ai(msg: string, options?: Partial<ToastOptions> & {
+        agentName?: string;
+        confidence?: number;
+        showCursor?: boolean;
+    }): HTMLElement;
     /**
-     * Display a success toast
+     * Show a centered loading toast. Dismiss with `dismissLoading()`.
      * @public
      */
-    static success(message: string, options?: Partial<ToastOptions>): void;
-    /**
-     * Display an error toast
-     * @public
-     */
-    static error(message: string, options?: Partial<ToastOptions>): void;
-    /**
-     * Display a warning toast
-     * @public
-     */
-    static warning(message: string, options?: Partial<ToastOptions>): void;
-    /**
-     * Display an info toast
-     * @public
-     */
-    static info(message: string, options?: Partial<ToastOptions>): void;
-    /**
-     * PRODUCTION GRADE LOADING - Centered, beautiful spinner
-     * @public
-     */
-    static loading(message: string, options?: Partial<ToastOptions>): void;
-    /**
-     * Dismiss the active loading toast
-     * @public
-     */
+    static loading(msg: string, options?: Partial<ToastOptions>): void;
+    /** @public */
     static dismissLoading(): void;
     /**
-     * IMPROVED: Promise support with proper loading management
+     * Promise-based toast — loading → success | error.
      * @public
      */
-    static promise<T>(promise: Promise<T>, messages: {
-        loading: string;
-        success: string | ((data: T) => string);
-        error: string | ((error: any) => string);
-    }, options?: Partial<ToastOptions>): Promise<T>;
     /**
-     * Clear all active toasts
+     * Shows a loading toast, then auto-transitions to success or error.
+     * Perfect for API calls, file uploads, form submissions.
+     */
+    static promise<T>(promiseOrFn: Promise<T> | (() => Promise<T>), options: PromiseOptions<T>): Promise<T>;
+    /**
+     * Shows an AI-typing-style toast that streams text chunk by chunk.
+     * Returns a StreamController to push chunks from LLM streams.
+     */
+    static stream(options: StreamOptions): StreamController;
+    /**
+     * Update an existing toast by ID (message, type, anything).
+     */
+    static update(id: string, options: Partial<ToastOptions>): void;
+    /**
+     * Pause all running timers (e.g., when showing a modal).
+     */
+    static pauseAll(): void;
+    /**
+     * Resume all paused timers.
+     */
+    static resumeAll(): void;
+    /**
+     * Show multiple toasts as a grouped batch with shared dismiss.
+     */
+    static batch(toasts: ToastOptions[], sharedOptions?: Partial<ToastOptions>): string[];
+    /**
+     * Change global default theme at runtime.
+     */
+    static setTheme(theme: ThemePreset): void;
+    /**
+     * Set global defaults once.
+     */
+    static configure(defaults: Partial<ToastOptions>): void;
+    /**
+     * Dismiss a toast by ID string or HTMLElement reference.
+     * @public
+     */
+    static dismiss(idOrEl: string | HTMLElement): void;
+    /**
+     * Clear all active toasts.
      * @public
      */
     static clear(): void;
-    /**
-     * Clear a specific toast by its element
-     * @param toastElement - The toast element to remove
-     * @public
-     */
-    static dismiss(toastElement: HTMLElement): void;
 }
-export { NotifyX }
 export default NotifyX;
 
-/**
- * Toast position type
- * @public
- */
-declare type Position_2 = (typeof POSITIONS)[keyof typeof POSITIONS];
+declare type Position_2 = 'top-right' | 'top-left' | 'top-center' | 'bottom-right' | 'bottom-left' | 'bottom-center' | 'center';
 export { Position_2 as Position }
 
-/**
- * Available toast positions on screen
- * @public
- */
-export declare const POSITIONS: {
-    readonly TOP_RIGHT: "top-right";
-    readonly TOP_LEFT: "top-left";
-    readonly TOP_CENTER: "top-center";
-    readonly BOTTOM_RIGHT: "bottom-right";
-    readonly BOTTOM_LEFT: "bottom-left";
-    readonly BOTTOM_CENTER: "bottom-center";
-    readonly CENTER: "center";
-};
-
-/**
- * Toast notification configuration options
- * @public
- */
-export declare interface ToastOptions {
-    /** The message to display in the toast */
-    message: string;
-    /** Type of toast notification */
-    type?: ToastType;
-    /** Duration in milliseconds (0 = persistent, stays until manually dismissed) */
-    duration?: number;
-    /** Position on screen */
+export declare interface PromiseOptions<T> {
+    loading: string | {
+        title?: string;
+        message: string;
+    };
+    success: string | ((data: T) => string) | {
+        title?: string;
+        message: string | ((data: T) => string);
+    };
+    error: string | ((err: unknown) => string) | {
+        title?: string;
+        message: string | ((err: unknown) => string);
+    };
     position?: Position_2;
-    /** Whether the toast can be manually dismissed */
-    dismissible?: boolean;
-    /** Show a progress bar indicating remaining time */
-    showProgress?: boolean;
-    /** Show icon based on toast type */
-    showIcon?: boolean;
-    /** Custom icon to display (overrides default type icon) */
-    icon?: string;
-    /** Pause auto-dismiss timer on hover */
-    pauseOnHover?: boolean;
-    /** Callback fired when toast is closed */
-    onClose?: () => void;
-    /** Maximum number of toasts to show simultaneously */
-    maxToasts?: number;
+    animation?: AnimationPreset;
+    id?: string;
 }
 
-/**
- * Toast notification types
- * @public
- */
-export declare type ToastType = "success" | "error" | "warning" | "info" | "default";
+export declare interface StreamController {
+    update: (chunk: string) => void;
+    set: (message: string) => void;
+    success: (message: string, options?: Partial<ToastOptions>) => void;
+    error: (message: string, options?: Partial<ToastOptions>) => void;
+    dismiss: () => void;
+}
+
+export declare interface StreamOptions {
+    position?: Position_2;
+    animation?: AnimationPreset;
+    id?: string;
+    title?: string;
+    ai?: AIMetadata;
+    onComplete?: (finalMessage: string) => void;
+    onChunk?: (chunk: string, accumulated: string) => void;
+    loadingMessage?: string;
+}
+
+export declare type ThemePreset = 'auto' | 'light' | 'dark' | 'glass' | 'minimal' | 'brutal';
+
+export declare interface ToastAction {
+    label: string;
+    onClick: (toastId: string) => void;
+    variant?: 'primary' | 'ghost' | 'danger';
+}
+
+export declare interface ToastOptions {
+    message: string;
+    title?: string;
+    type?: ToastType;
+    position?: Position_2;
+    duration?: number;
+    dismissible?: boolean;
+    animation?: AnimationPreset;
+    theme?: ThemePreset;
+    priority?: ToastPriority;
+    id?: string;
+    actions?: ToastAction[];
+    icon?: string | HTMLElement;
+    richHtml?: string;
+    ai?: AIMetadata;
+    pauseOnHover?: boolean;
+    pauseOnFocus?: boolean;
+    onClose?: (id: string) => void;
+    onClick?: (id: string) => void;
+    maxToasts?: number;
+    showProgress?: boolean;
+    showIcon?: boolean;
+    className?: string;
+}
+
+export declare type ToastPriority = 'low' | 'normal' | 'high' | 'critical';
+
+export declare type ToastType = 'success' | 'error' | 'warning' | 'info' | 'loading' | 'ai' | 'default';
 
 export { }

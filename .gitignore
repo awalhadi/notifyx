@@ -178,3 +178,6 @@ out
 folder_structure/
 .qodo
 .vscode
+
+# npm config
+.npmrc

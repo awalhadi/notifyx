@@ -1,4 +1,4 @@
-import type { Position } from '../constants/positions';
+import type { Position } from '../types';
 
 /**
  * Cache for container queries to improve performance
