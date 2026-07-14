@@ -7,7 +7,52 @@ export declare interface AIMetadata {
     latencyMs?: number;
 }
 
+/**
+ * AnimationEngine — centralises all animation logic.
+ * @public
+ */
+declare class AnimationEngine {
+    private static prefersReducedMotion;
+    /**
+     * Apply the enter animation to a toast element.
+     * Accepts optional position/theme args (currently unused — reserved for slide direction override).
+     */
+    static enter(el: HTMLElement, style?: AnimationPreset, _position?: string): void;
+    /**
+     * Apply the exit animation and return a Promise that resolves when done.
+     */
+    static exit(el: HTMLElement, style?: AnimationPreset, _position?: string): Promise<void>;
+    /**
+     * Brief attention-shake animation (used for critical priority toasts).
+     */
+    static shake(el: HTMLElement): void;
+    /**
+     * Pulse attention on an existing toast (e.g. dedup hit).
+     */
+    static pulse(el: HTMLElement): void;
+    /**
+     * Post-stream celebratory shimmer.
+     */
+    static shimmerHighlight(el: HTMLElement): void;
+    /**
+     * Stagger entrance of multiple elements (e.g. queue flush).
+     */
+    static staggerEnter(elements: HTMLElement[], style?: AnimationPreset, delayMs?: number): void;
+}
+
 export declare type AnimationPreset = 'spring' | 'slide' | 'bloom' | 'flip' | 'fade' | 'none';
+
+declare type NormalizedToastOptions = Required<Omit<ToastOptions, "icon" | "title" | "actions" | "id" | "className" | "onClick" | "onClose" | "ai" | "richHtml">> & {
+    icon?: string | HTMLElement;
+    title?: string;
+    actions?: ToastAction[];
+    id?: string;
+    className?: string;
+    onClick?: (id: string) => void;
+    onClose?: (id: string) => void;
+    ai?: AIMetadata;
+    richHtml?: string;
+};
 
 /**
  * NotifyX — AI-native, premium toast notification library.
@@ -52,8 +97,6 @@ declare class NotifyX {
         readonly pauseOnFocus: false;
         readonly priority: "normal";
     };
-    /** @private */
-    private static pulse;
     /** @private */
     private static attachGestures;
     /** @private */
@@ -142,6 +185,12 @@ declare class NotifyX {
      * @public
      */
     static clear(): void;
+    /** Access the global priority queue for advanced use cases. */
+    static get queue(): ToastQueue;
+    /** Access AnimationEngine for advanced animation control. */
+    static get animation(): typeof AnimationEngine;
+    /** Access StreamBridge for streaming utilities. */
+    static get stream_bridge(): typeof StreamBridge;
 }
 export default NotifyX;
 
@@ -164,6 +213,51 @@ export declare interface PromiseOptions<T> {
     position?: Position_2;
     animation?: AnimationPreset;
     id?: string;
+}
+
+declare interface QueueEntry {
+    options: NormalizedToastOptions;
+    priority: number;
+    timestamp: number;
+    id: string;
+}
+
+/**
+ * StreamBridge — pure utility class for reading streaming sources.
+ * No circular dependency on NotifyX. The NotifyX class calls these
+ * helpers to obtain async generators it pipes into DOM elements.
+ * @public
+ */
+declare class StreamBridge {
+    /**
+     * Yields decoded string chunks from a fetch() ReadableStream<Uint8Array>.
+     */
+    static fromUint8Stream(stream: ReadableStream<Uint8Array>, parseChunk?: (raw: string) => string): AsyncGenerator<string>;
+    /**
+     * Extracts text chunks from an AsyncIterable (OpenAI / Anthropic / custom).
+     * Uses a heuristic extractor that handles common LLM SDK chunk shapes.
+     */
+    static fromIterable<T>(source: AsyncIterable<T>, extract?: (chunk: T) => string): AsyncGenerator<string>;
+    /**
+     * Yields characters from a plain string with a delay (for demos / testing).
+     */
+    static fakeStream(text: string, chunkSize?: number, delayMs?: number): AsyncGenerator<string>;
+    /**
+     * Pipes any supported source into a DOM element's textContent,
+     * appending each chunk. Returns the full accumulated text.
+     *
+     * Supported sources:
+     *   - string (immediate)
+     *   - Promise<string>
+     *   - AsyncIterable<T>
+     *   - ReadableStream<Uint8Array>  (fetch body)
+     *   - ReadableStream<string>
+     */
+    static pipe<T>(source: string | Promise<string> | AsyncIterable<T> | ReadableStream<Uint8Array> | ReadableStream<string>, target: HTMLElement, onChunk?: (chunk: string, full: string) => void): Promise<string>;
+    /**
+     * Heuristic text extractor — handles common LLM SDK chunk shapes.
+     */
+    static extractText(chunk: unknown): string;
 }
 
 export declare interface StreamController {
@@ -219,6 +313,8 @@ export declare interface ToastOptions {
 }
 
 export declare type ToastPriority = 'low' | 'normal' | 'high' | 'critical';
+
+/* Excluded from this release type: ToastQueue */
 
 export declare type ToastType = 'success' | 'error' | 'warning' | 'info' | 'loading' | 'ai' | 'default';
 

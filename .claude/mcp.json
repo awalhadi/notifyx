@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "gitpro": {
+      "command": "node",
+      "args": [
+        "/home/dev/.vscode/extensions/gitpro.contour-3.9.1/dist/mcp-server.js"
+      ],
+      "description": "GitPro Suite — git context for AI agents"
+    },
+    "gitpeak": {
+      "command": "node",
+      "args": [
+        "/home/dev/.antigravity-ide/extensions/notifyx.gitpeak-3.9.8-universal/dist/mcp-server.js"
+      ],
+      "description": "GitPeak Suite — git context for AI agents"
+    }
+  }
+}

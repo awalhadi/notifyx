@@ -3,6 +3,7 @@
 # 🚀 NotifyX v4
 
 ### The professional-grade notification library built for the AI era.
+
 **Visually stunning for designers, robust enough for complex architectures, and optimized for real-time AI streaming.**
 
 [![npm version](https://img.shields.io/npm/v/notifyx?color=success&style=flat-square)](https://www.npmjs.com/package/notifyx)
@@ -11,7 +12,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue?style=flat-square)](https://www.typescriptlang.org/)
 [![license](https://img.shields.io/npm/l/notifyx?style=flat-square)](LICENSE)
 
-[Demo](https://github.com/awalhadi/notifyx) • [Installation](#-installation) • [AI Integration](#-ai--mcp-integration) • [Stack UI](#-stack-based-ui--priority-queue) • [Themes](#-zero-dependency-theme-system)
+[Demo](https://notifyx.dev) • [Installation](#-installation) • [AI Integration](#-ai--mcp-integration) • [Stack UI](#-stack-based-ui--priority-queue) • [Themes](#-zero-dependency-theme-system)
 
 </div>
 
@@ -23,17 +24,17 @@ NotifyX v4 is engineered from the ground up to solve the challenges of modern we
 
 ### Competitive Differentiation
 
-| Feature | NotifyX v4 | react-hot-toast | sonner | react-toastify |
-| :--- | :---: | :---: | :---: | :---: |
-| **Stack-Based UI** | ✅ Elegant 3D | ❌ | ✅ | ❌ |
-| **AI/Streaming API** | ✅ Native | ❌ | ❌ | ❌ |
-| **MCP-Ready** | ✅ | ❌ | ❌ | ❌ |
-| **Web Animations API** | ✅ GPU Accelerated | ❌ | limited | limited |
-| **Theme System** | ✅ 6 robust themes | ❌ | partial | partial |
-| **Vanilla JS Support**| ✅ | ❌ | ❌ | partial |
-| **Priority Queue** | ✅ | ❌ | ❌ | ❌ |
-| **Zero Dependencies** | ✅ | ✅ | ✅ | ❌ |
-| **Bundle < 7KB** | ✅ | ✅ | ✅ | ❌ |
+| Feature                |     NotifyX v4     | react-hot-toast | sonner  | react-toastify |
+| :--------------------- | :----------------: | :-------------: | :-----: | :------------: |
+| **Stack-Based UI**     |   ✅ Elegant 3D    |       ❌        |   ✅    |       ❌       |
+| **AI/Streaming API**   |     ✅ Native      |       ❌        |   ❌    |       ❌       |
+| **MCP-Ready**          |         ✅         |       ❌        |   ❌    |       ❌       |
+| **Web Animations API** | ✅ GPU Accelerated |       ❌        | limited |    limited     |
+| **Theme System**       | ✅ 6 robust themes |       ❌        | partial |    partial     |
+| **Vanilla JS Support** |         ✅         |       ❌        |   ❌    |    partial     |
+| **Priority Queue**     |         ✅         |       ❌        |   ❌    |       ❌       |
+| **Zero Dependencies**  |         ✅         |       ✅        |   ✅    |       ❌       |
+| **Bundle < 7KB**       |         ✅         |       ✅        |   ✅    |       ❌       |
 
 ---
 
@@ -53,17 +54,17 @@ bun add notifyx
 ### Setup
 
 ```javascript
-import NotifyX from 'notifyx';
-import 'notifyx/style.css'; // Required for UI styling
+import NotifyX from "notifyx";
+import "notifyx/style.css"; // Required for UI styling
 
-NotifyX.success('Ready for the AI era! 🚀');
+NotifyX.success("Ready for the AI era! 🚀");
 ```
 
 ---
 
 ## 🏗 Stack-Based UI & Priority Queue
 
-NotifyX v4 departs from legacy list-based rendering, introducing a **Stack-Based Architecture**. 
+NotifyX v4 departs from legacy list-based rendering, introducing a **Stack-Based Architecture**.
 Notifications gracefully stack with dynamic `transform: scale()` and `translateY()` 3D layering, saving vertical screen real estate while feeling incredibly premium.
 
 Under the hood, the **Priority Queue Manager** handles influxes of notifications perfectly. If an application throws 20 events at once, NotifyX will instantly display the allowed maximum (`maxToasts`), gracefully holding the rest in memory and seamlessly rendering them as active toasts are dismissed.
@@ -80,8 +81,8 @@ NotifyX.ai("Processing context...", {
     model: "claude-3-5-sonnet",
     toolName: "read_file",
     latencyMs: 1240,
-    tokens: 450
-  }
+    tokens: 450,
+  },
 });
 ```
 
@@ -96,7 +97,7 @@ LLMs stream responses token-by-token. NotifyX's `StreamingBridge` ensures smooth
 ```javascript
 const stream = NotifyX.stream("Thinking...", {
   ai: { model: "gpt-4o", streaming: true },
-  position: "bottom-right"
+  position: "bottom-right",
 });
 
 // Stream chunks as they arrive
@@ -106,10 +107,11 @@ stream.update("in your code.");
 
 // Finalize
 stream.success("Analysis complete!", {
-  ai: { streaming: false, latencyMs: 850 }
+  ai: { streaming: false, latencyMs: 850 },
 });
 ```
-*A blinking `▋` cursor is natively rendered while streaming is active!*
+
+_A blinking `▋` cursor is natively rendered while streaming is active!_
 
 ---
 
@@ -118,14 +120,11 @@ stream.success("Analysis complete!", {
 Manage asynchronous workflows beautifully.
 
 ```javascript
-NotifyX.promise(
-  fetch('/api/user/profile'),
-  {
-    loading: 'Loading profile...',
-    success: 'Profile loaded!',
-    error: 'Failed to fetch profile'
-  }
-);
+NotifyX.promise(fetch("/api/user/profile"), {
+  loading: "Loading profile...",
+  success: "Profile loaded!",
+  error: "Failed to fetch profile",
+});
 ```
 
 ---
@@ -137,17 +136,18 @@ NotifyX v4 ships with 6 distinct, highly-polished themes powered by Vanilla CSS 
 - `auto` (Default) — Adapts to OS preference
 - `light` — Pristine, modern white
 - `dark` — Deep, sleek dark mode
-- `glass` — Premium frosted glassmorphism 
+- `glass` — Premium frosted glassmorphism
 - `minimal` — Flat, pure content focus
 - `brutal` — Monochrome, monospace brutalist
 
 **Usage:**
+
 ```javascript
 // Globally
-NotifyX.setTheme('glass');
+NotifyX.setTheme("glass");
 
 // Per-Toast
-NotifyX.success('Task complete', { theme: 'brutal' });
+NotifyX.success("Task complete", { theme: "brutal" });
 ```
 
 ---
@@ -163,7 +163,7 @@ Powered by the **Web Animations API** for buttery-smooth 60fps rendering, bypass
 - `fade` — Simple opacity transition
 
 ```javascript
-NotifyX.info('System update', { animation: 'bloom' });
+NotifyX.info("System update", { animation: "bloom" });
 ```
 
 ---
@@ -182,12 +182,12 @@ Because NotifyX v4 is built on a modular architecture, we expose the underlying 
 
 ```javascript
 NotifyX.configure({
-  theme: 'glass',
-  animation: 'spring',
-  position: 'top-right',
+  theme: "glass",
+  animation: "spring",
+  position: "top-right",
   duration: 4000,
   maxToasts: 3,
-  pauseOnHover: true
+  pauseOnHover: true,
 });
 ```
 

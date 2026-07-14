@@ -1,6 +1,6 @@
 {
   "name": "notifyx",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "author": "A Awal Hadi",
   "type": "module",
   "main": "dist/notifyx.cjs",
@@ -14,7 +14,8 @@
       "require": "./dist/notifyx.cjs",
       "default": "./dist/notifyx.es.js"
     },
-    "./style.css": "./dist/notifyx.min.css"
+    "./style.css": "./dist/notifyx.min.css",
+    "./package.json": "./package.json"
   },
   "devDependencies": {
     "@types/bun": "latest",
