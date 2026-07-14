@@ -9,7 +9,7 @@ export type AnimationPreset = 'spring' | 'slide' | 'bloom' | 'flip' | 'fade' | '
 
 export type ToastPriority = 'low' | 'normal' | 'high' | 'critical';
 
-export type ThemePreset = 'auto' | 'light' | 'dark' | 'glass' | 'minimal' | 'brutal';
+export type ThemePreset = 'auto' | 'light' | 'dark' | 'glass' | 'minimal' | 'brutal' | 'neo' | 'neon' | 'flat';
 
 export interface ToastAction {
   label: string;
