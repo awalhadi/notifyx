@@ -30,7 +30,7 @@ NotifyX v4 is engineered from the ground up to solve the challenges of modern we
 | **AI/Streaming API**   |     ✅ Native      |       ❌        |   ❌    |       ❌       |
 | **MCP-Ready**          |         ✅         |       ❌        |   ❌    |       ❌       |
 | **Web Animations API** | ✅ GPU Accelerated |       ❌        | limited |    limited     |
-| **Theme System**       | ✅ 6 robust themes |       ❌        | partial |    partial     |
+| **Theme System**       | ✅ 9 theme presets |       ❌        | partial |    partial     |
 | **Vanilla JS Support** |         ✅         |       ❌        |   ❌    |    partial     |
 | **Priority Queue**     |         ✅         |       ❌        |   ❌    |       ❌       |
 | **Zero Dependencies**  |         ✅         |       ✅        |   ✅    |       ❌       |
@@ -131,24 +131,68 @@ NotifyX.promise(fetch("/api/user/profile"), {
 
 ## 🎨 Zero-Dependency Theme System
 
-NotifyX v4 ships with 6 distinct, highly-polished themes powered by Vanilla CSS Custom Properties—no Tailwind required.
+NotifyX v4 ships with **9 theme presets** defined by the `ThemePreset` type. All styling is vanilla CSS (no Tailwind). Import `notifyx/style.css` to enable them.
 
-- `auto` (Default) — Adapts to OS preference
-- `light` — Pristine, modern white
-- `dark` — Deep, sleek dark mode
-- `glass` — Premium frosted glassmorphism
-- `minimal` — Flat, pure content focus
-- `brutal` — Monochrome, monospace brutalist
+### System themes
 
-**Usage:**
+Adapt to the environment or force a mode:
+
+| Preset | Description |
+| :----- | :---------- |
+| `auto` | **Default.** Monochrome surface; follows OS light/dark via `prefers-color-scheme` |
+| `light` | Force light surfaces on all toasts |
+| `dark` | Force dark surfaces on all toasts |
+
+### Style themes
+
+Fixed visual identities for branded UIs:
+
+| Preset | Description |
+| :----- | :---------- |
+| `glass` | Frosted glassmorphism with backdrop blur |
+| `minimal` | Clean cards with a colored left accent bar per toast type |
+| `flat` | Tinted status backgrounds; dark variant via OS preference |
+| `neo` | Soft neumorphic dual-shadow; surface adapts to page light/dark |
+| `neon` | Dark terminal panel with per-type luminous rim glow |
+| `brutal` | High-contrast brutalist: hard borders, monospace, offset shadow |
+
+### Usage
 
 ```javascript
-// Globally
-NotifyX.setTheme("glass");
+// Global — sets data-notifyx-theme on <html>
+NotifyX.setTheme("neo");
 
-// Per-Toast
-NotifyX.success("Task complete", { theme: "brutal" });
+// Per toast — overrides global for one notification
+NotifyX.success("Saved", { theme: "flat" });
+
+// Default at init
+NotifyX.configure({ theme: "glass" });
 ```
+
+Calling `setTheme("auto")` removes `data-notifyx-theme` from `<html>` and restores OS-adaptive behavior.
+
+### Neo page mode
+
+The `neo` theme uses shadow pairs that match the **host page background**. Set on `<html>`:
+
+```html
+<html data-notifyx-mode="light">  <!-- or "dark" -->
+```
+
+- Without `data-notifyx-mode`, neo follows `prefers-color-scheme: dark` on dark pages
+- `data-notifyx-mode="light"` keeps light neumorphic shadows even on a dark OS theme
+
+Try the Page Light/Dark toggle in [`example/index.html`](example/index.html) with the Neo theme selected.
+
+### CSS hooks
+
+For custom integrations or overrides:
+
+- **Theme:** `data-notifyx-theme="{preset}"` on `<html>` (global) or on an individual `.notifyx` element
+- **Page mode (neo):** `data-notifyx-mode="light"` or `"dark"` on `<html>`
+- **Source:** built from `src/styles/themes.css`, shipped as `notifyx/style.css`
+
+Valid `ThemePreset` values: `'auto' | 'light' | 'dark' | 'glass' | 'minimal' | 'flat' | 'brutal' | 'neo' | 'neon'`
 
 ---
 

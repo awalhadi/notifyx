@@ -10,7 +10,7 @@
     "gitpeak": {
       "command": "node",
       "args": [
-        "/home/dev/.antigravity-ide/extensions/notifyx.gitpeak-3.9.8-universal/dist/mcp-server.js"
+        "/home/dev/.cursor/extensions/notifyx.gitpeak-4.0.13/dist/mcp-server.js"
       ],
       "description": "GitPeak Suite — git context for AI agents"
     }

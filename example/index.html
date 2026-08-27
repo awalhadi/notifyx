@@ -7,7 +7,7 @@
   <meta name="description" content="The most visually polished, AI-native toast notification library. Zero deps, &lt;7KB gzipped." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../dist/notifyx.min.css?v=2" />
+  <link rel="stylesheet" href="../dist/notifyx.min.css?v=3.1" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -21,6 +21,60 @@
       --accent2: #3b82f6;
       --accent3: #10b981;
       --radius: 18px;
+      --chip-active-bg: rgba(124,58,237,0.22);
+      --chip-active-border: rgba(124,58,237,0.55);
+      --chip-active-text: #f1f5f9;
+      --status-accent: #c4b5fd;
+    }
+
+    html[data-demo-mode="light"] {
+      --bg: #e8ecf1;
+      --surface: rgba(255,255,255,0.82);
+      --border: rgba(15,23,42,0.1);
+      --text: #1e293b;
+      --muted: rgba(30,41,59,0.58);
+      --chip-active-bg: rgba(59,130,246,0.14);
+      --chip-active-border: rgba(59,130,246,0.35);
+      --chip-active-text: #1e40af;
+      --status-accent: #2563eb;
+    }
+
+    html[data-demo-mode="light"] body::before {
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(59,130,246,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(124,58,237,0.08) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 60% at 50% 90%, rgba(16,185,129,0.08) 0%, transparent 60%);
+    }
+
+    html[data-demo-mode="light"] h1 {
+      background: linear-gradient(135deg, #1e293b 20%, #6366f1 55%, #2563eb 85%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    html[data-demo-mode="light"] .hero-badge {
+      color: #4338ca;
+      background: rgba(99,102,241,0.12);
+      border-color: rgba(99,102,241,0.25);
+    }
+
+    html[data-demo-mode="light"] .btn:hover,
+    html[data-demo-mode="light"] .theme-chip:hover,
+    html[data-demo-mode="light"] .mode-chip:hover {
+      border-color: rgba(15,23,42,0.18);
+    }
+
+    html[data-demo-mode="light"] pre {
+      color: #334155;
+    }
+
+    html[data-demo-mode="light"] .cm {
+      color: rgba(15,23,42,0.4);
+    }
+
+    html[data-demo-mode="light"] .feature:hover {
+      border-color: rgba(15,23,42,0.16);
     }
 
     html { scroll-behavior: smooth; }
@@ -189,6 +243,90 @@
 
     .btn-icon { font-size: 16px; line-height: 1; }
 
+    /* ── Theme switcher ── */
+    .theme-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .theme-chip {
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--muted);
+      transition: all 0.18s ease;
+    }
+
+    .theme-chip:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .theme-chip.active,
+    .mode-chip.active {
+      color: var(--chip-active-text);
+      border-color: var(--chip-active-border);
+      background: var(--chip-active-bg);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--chip-active-border) 30%, transparent);
+    }
+
+    .theme-status {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .theme-status strong {
+      color: var(--status-accent);
+      font-weight: 600;
+    }
+
+    .mode-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .mode-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-right: 4px;
+    }
+
+    .mode-chip {
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--muted);
+      transition: all 0.18s ease;
+    }
+
+    .mode-chip:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .btn-theme-preview::before {
+      background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(59,130,246,0.12));
+    }
+
     /* ── Code block ── */
     .code-card {
       background: rgba(0,0,0,0.4);
@@ -265,6 +403,42 @@
         <span class="badge">🌙 Auto dark mode</span>
         <span class="badge">♿ ARIA accessible</span>
         <span class="badge">📦 TypeScript</span>
+      </div>
+    </div>
+
+    <!-- Themes -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Themes</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="mode-bar" id="mode-bar">
+        <span class="mode-label">Page</span>
+        <button type="button" class="mode-chip" data-mode="light">Light</button>
+        <button type="button" class="mode-chip active" data-mode="dark">Dark</button>
+      </div>
+      <p class="theme-status">
+        Page mode: <strong id="mode-label">dark</strong>
+        · Active theme: <strong id="theme-label">auto</strong>
+      </p>
+      <div class="theme-bar" id="theme-bar">
+        <button type="button" class="theme-chip active" data-theme="auto">Auto</button>
+        <button type="button" class="theme-chip" data-theme="light">Light</button>
+        <button type="button" class="theme-chip" data-theme="dark">Dark</button>
+        <button type="button" class="theme-chip" data-theme="glass">Glass</button>
+        <button type="button" class="theme-chip" data-theme="minimal">Minimal</button>
+        <button type="button" class="theme-chip" data-theme="flat">Flat</button>
+        <button type="button" class="theme-chip" data-theme="neo">Neo</button>
+        <button type="button" class="theme-chip" data-theme="neon">Neon</button>
+        <button type="button" class="theme-chip" data-theme="brutal">Brutal</button>
+      </div>
+      <div class="btn-grid">
+        <button id="btn-theme-preview" class="btn btn-theme-preview" onclick="previewAllTypes()">
+          <span class="btn-icon">🎨</span> Preview All Types
+        </button>
+        <button id="btn-theme-stack" class="btn btn-theme-preview" onclick="previewThemeStack()">
+          <span class="btn-icon">📚</span> Stack All Types
+        </button>
       </div>
     </div>
 
@@ -478,7 +652,7 @@ NotifyX.<span class="fn">error</span>(<span class="str">'Deployment failed.'</sp
         <div class="feature">
           <div class="feature-icon">🎨</div>
           <h3>Theme System</h3>
-          <p>Light · Dark · Glass · Minimal · Neo — auto or manual.</p>
+          <p>Auto · Light · Dark · Glass · Minimal · Flat · Neo · Neon · Brutal.</p>
         </div>
         <div class="feature">
           <div class="feature-icon">🧱</div>
@@ -501,6 +675,80 @@ NotifyX.<span class="fn">error</span>(<span class="str">'Deployment failed.'</sp
 
   <script src="../dist/notifyx.min.js?v=2"></script>
   <script>
+    let currentTheme = 'auto';
+    let currentMode = 'dark';
+
+    function setDemoMode(mode) {
+      currentMode = mode;
+      document.documentElement.setAttribute('data-demo-mode', mode);
+      document.documentElement.setAttribute('data-notifyx-mode', mode);
+      document.getElementById('mode-label').textContent = mode;
+      document.querySelectorAll('.mode-chip').forEach((chip) => {
+        chip.classList.toggle('active', chip.dataset.mode === mode);
+      });
+    }
+
+    document.getElementById('mode-bar').addEventListener('click', (event) => {
+      const chip = event.target.closest('[data-mode]');
+      if (!chip) return;
+      setDemoMode(chip.dataset.mode);
+      NotifyX.info(`Page switched to ${chip.dataset.mode} mode`, {
+        title: 'Page Mode',
+        duration: 2500,
+        showProgress: false,
+      });
+    });
+
+    setDemoMode('dark');
+
+    function setDemoTheme(theme) {
+      currentTheme = theme;
+      NotifyX.setTheme(theme);
+      document.getElementById('theme-label').textContent = theme;
+      document.querySelectorAll('.theme-chip').forEach((chip) => {
+        chip.classList.toggle('active', chip.dataset.theme === theme);
+      });
+    }
+
+    document.getElementById('theme-bar').addEventListener('click', (event) => {
+      const chip = event.target.closest('[data-theme]');
+      if (!chip) return;
+      setDemoTheme(chip.dataset.theme);
+      NotifyX.info(`Theme switched to "${chip.dataset.theme}"`, {
+        title: 'Theme Updated',
+        duration: 2500,
+        showProgress: false,
+      });
+    });
+
+    function previewAllTypes() {
+      NotifyX.clear();
+      const types = [
+        { fn: () => NotifyX.success('All services healthy.', { title: 'Success', duration: 8000 }) },
+        { fn: () => NotifyX.error('Connection refused on port 5432.', { title: 'Error', duration: 8000 }) },
+        { fn: () => NotifyX.warning('Token expires in 5 minutes.', { title: 'Warning', duration: 8000 }) },
+        { fn: () => NotifyX.info('Build #491 queued.', { title: 'Info', duration: 8000 }) },
+        { fn: () => NotifyX.show({ message: 'System maintenance at 02:00 UTC.', title: 'Default', duration: 8000 }) },
+        { fn: () => NotifyX.ai('Analysis complete. Anomaly detected in cluster node-7.', { title: 'AI', duration: 8000 }) },
+        { fn: () => NotifyX.loading('Processing request…') },
+      ];
+
+      types.forEach((item, index) => {
+        setTimeout(item.fn, index * 350);
+      });
+    }
+
+    function previewThemeStack() {
+      NotifyX.clear();
+      NotifyX.dismissLoading();
+      NotifyX.success('Deployment complete.', { title: 'Success', duration: 0, position: 'top-right' });
+      NotifyX.error('Database connection failed.', { title: 'Error', duration: 0, position: 'top-right' });
+      NotifyX.warning('Session expires soon.', { title: 'Warning', duration: 0, position: 'top-right' });
+      NotifyX.info('Build queued.', { title: 'Info', duration: 0, position: 'top-right' });
+      NotifyX.show({ message: 'Maintenance scheduled.', title: 'Default', duration: 0, position: 'top-right' });
+      NotifyX.ai('Streaming analysis ready.', { title: 'AI', duration: 0, position: 'top-right' });
+    }
+
     // Promise demo
     async function testPromise() {
       const mock = new Promise((res, rej) =>

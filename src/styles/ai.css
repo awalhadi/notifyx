@@ -1,76 +1,88 @@
-/* AI Toast — distinct from info/success */
+/* AI Toast — signal accent (NotifyX orange), not purple flood */
 .notifyx-ai {
-  color: #0f172a;
-  background: linear-gradient(
-    135deg,
-    rgba(248, 250, 255, 0.97) 0%,
-    rgba(237, 242, 255, 0.97) 50%,
-    rgba(224, 231, 255, 0.97) 100%
-  );
-  border-color: rgba(99, 102, 241, 0.35);
-  border-width: 1px;
-  /* Subtle animated border glow */
+  color: #0a0a0a;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow:
-    0 0 0 1px rgba(99, 102, 241, 0.1),
-    0 10px 40px -10px rgba(99, 102, 241, 0.25),
-    0 20px 50px -15px rgba(99, 102, 241, 0.12),
-    inset 0 1px rgba(255, 255, 255, 0.8);
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 4px 16px -4px rgba(0, 0, 0, 0.1);
 }
 
-/* Pulsing border for streaming AI toasts */
+@media (prefers-color-scheme: dark) {
+  .notifyx-ai {
+    background: #0a0a0a;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fafafa;
+  }
+}
+
 .notifyx-ai[data-streaming="true"] {
+  border-color: rgba(249, 115, 22, 0.45);
   animation: notifyx-ai-border-pulse 2s ease-in-out infinite;
 }
+
 @keyframes notifyx-ai-border-pulse {
-  0%, 100% { border-color: rgba(99, 102, 241, 0.3); }
-  50%       { border-color: rgba(99, 102, 241, 0.7); }
+  0%,
+  100% {
+    border-color: rgba(249, 115, 22, 0.3);
+  }
+  50% {
+    border-color: rgba(249, 115, 22, 0.7);
+  }
 }
 
 .notifyx-ai .notifyx-icon {
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
-  color: #fff;
-  /* AI sparkle icon */
+  color: #f97316;
+  background: transparent;
   font-size: 14px;
 }
 
-/* AI metadata bar — shows model, tokens, latency */
 .notifyx-ai-meta {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 6px;
   padding-top: 6px;
-  border-top: 1px solid rgba(99, 102, 241, 0.12);
+  border-top: 1px solid rgba(249, 115, 22, 0.15);
   font-size: 10px;
-  opacity: 0.6;
-  font-family: ui-monospace, monospace;
+  opacity: 0.65;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
   letter-spacing: 0.02em;
 }
+
 .notifyx-ai-meta-badge {
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.22);
 }
 
-/* Loading toast — three-dot animation */
 .notifyx-loading {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
-  border-color: rgba(148, 163, 184, 0.4);
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
   color: #334155;
 }
-.notifyx-loading .notifyx-icon {
-  background: linear-gradient(135deg, #94a3b8, #64748b);
-  color: #fff;
+
+@media (prefers-color-scheme: dark) {
+  .notifyx-loading {
+    background: #0a0a0a;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+  }
 }
 
-/* AI thinking dots */
+.notifyx-loading .notifyx-icon {
+  color: #64748b;
+  background: transparent;
+}
+
 .notifyx-ai-dots {
   display: inline-flex;
   align-items: center;
   gap: 3px;
   margin-left: 4px;
 }
+
 .notifyx-ai-dots span {
   width: 4px;
   height: 4px;
@@ -78,11 +90,30 @@
   background: currentColor;
   animation: notifyx-ai-thinking 1.2s ease-in-out infinite both;
 }
-.notifyx-ai-dots span:nth-child(1) { animation-delay: 0s; }
-.notifyx-ai-dots span:nth-child(2) { animation-delay: 0.2s; }
-.notifyx-ai-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-/* Streaming cursor blink */
+.notifyx-ai-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+.notifyx-ai-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.notifyx-ai-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes notifyx-ai-thinking {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .notifyx-stream-cursor {
   display: inline-block;
   width: 2px;
@@ -93,11 +124,84 @@
   animation: notifyx-stream-pulse 0.7s step-end infinite;
 }
 
-/* Action buttons */
+@keyframes notifyx-stream-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
 .notifyx-actions {
   display: flex;
   gap: 8px;
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  .notifyx-actions {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Flat theme — AI toast overrides */
+[data-notifyx-theme="flat"] .notifyx-ai,
+.notifyx[data-notifyx-theme="flat"].notifyx-ai {
+  border: 1px solid hsl(var(--nx-ai-hue) 80% 55% / 0.35) !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px -2px rgba(0, 0, 0, 0.08) !important;
+}
+[data-notifyx-theme="flat"] .notifyx-ai[data-streaming="true"],
+.notifyx[data-notifyx-theme="flat"].notifyx-ai[data-streaming="true"] {
+  border-color: hsl(var(--nx-ai-hue) 80% 45% / 0.55) !important;
+  animation: notifyx-ai-border-pulse-flat 2s ease-in-out infinite;
+}
+@keyframes notifyx-ai-border-pulse-flat {
+  0%,
+  100% {
+    border-color: hsl(var(--nx-ai-hue) 80% 45% / 0.35);
+  }
+  50% {
+    border-color: hsl(var(--nx-ai-hue) 80% 45% / 0.7);
+  }
+}
+[data-notifyx-theme="flat"] .notifyx-ai .notifyx-icon,
+.notifyx[data-notifyx-theme="flat"].notifyx-ai .notifyx-icon {
+  color: hsl(var(--nx-ai-hue) 80% 35%) !important;
+  background: hsl(var(--nx-ai-hue) 80% 55% / 0.12) !important;
+}
+[data-notifyx-theme="flat"] .notifyx-ai-meta,
+.notifyx[data-notifyx-theme="flat"] .notifyx-ai-meta {
+  border-top-color: hsl(var(--nx-ai-hue) 80% 55% / 0.2);
+}
+[data-notifyx-theme="flat"] .notifyx-ai-meta-badge,
+.notifyx[data-notifyx-theme="flat"] .notifyx-ai-meta-badge {
+  background: hsl(var(--nx-ai-hue) 80% 55% / 0.12);
+  border-color: hsl(var(--nx-ai-hue) 80% 55% / 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-notifyx-theme="flat"] .notifyx-ai[data-streaming="true"],
+  .notifyx[data-notifyx-theme="flat"].notifyx-ai[data-streaming="true"] {
+    animation: notifyx-ai-border-pulse-flat-dark 2s ease-in-out infinite;
+  }
+  @keyframes notifyx-ai-border-pulse-flat-dark {
+    0%,
+    100% {
+      border-color: hsl(var(--nx-ai-hue) 80% 55% / 0.35);
+    }
+    50% {
+      border-color: hsl(var(--nx-ai-hue) 80% 55% / 0.65);
+    }
+  }
+  [data-notifyx-theme="flat"] .notifyx-ai .notifyx-icon,
+  .notifyx[data-notifyx-theme="flat"].notifyx-ai .notifyx-icon {
+    color: hsl(var(--nx-ai-hue) 80% 72%) !important;
+    background: hsl(var(--nx-ai-hue) 35% 40% / 0.2) !important;
+  }
 }
