@@ -22,7 +22,7 @@ const partials = [
 ];
 
 // Skip the @import lines from toast.css and just concatenate directly
-let combined = `/*!\n * NotifyX v3.0.0 — AI-Native Toast Notifications\n * https://github.com/awalhadi/notifyx\n * @author A Awal Hadi | MIT License\n */\n\n`;
+let combined = `/*!\n * NotifyX v4 — AI-Native Toast Notifications\n * https://github.com/awalhadi/notifyx\n * @author A Awal Hadi | MIT License\n */\n\n`;
 
 for (const file of partials) {
   const content = readFileSync(resolve(stylesDir, file), 'utf8');

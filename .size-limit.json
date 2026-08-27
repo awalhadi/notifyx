@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Core JS (UMD)",
+    "path": "dist/notifyx.min.js",
+    "limit": "4 KB",
+    "gzip": true
+  },
+  {
+    "name": "Core JS (ESM)",
+    "path": "dist/notifyx.es.js",
+    "limit": "5 KB",
+    "gzip": true
+  },
+  {
+    "name": "Core CSS (default theme)",
+    "path": "dist/notifyx.min.css",
+    "limit": "2.2 KB",
+    "gzip": true
+  },
+  {
+    "name": "Glass theme CSS (opt-in)",
+    "path": "dist/themes/glass.css",
+    "limit": "1.2 KB",
+    "gzip": true
+  }
+]

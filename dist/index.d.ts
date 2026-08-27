@@ -83,7 +83,10 @@ declare class NotifyX {
         readonly DARK: "dark";
         readonly GLASS: "glass";
         readonly MINIMAL: "minimal";
+        readonly FLAT: "flat";
         readonly BRUTAL: "brutal";
+        readonly NEO: "neo";
+        readonly NEON: "neon";
     };
     static readonly DEFAULT_OPTIONS: {
         readonly type: "info";
@@ -109,6 +112,8 @@ declare class NotifyX {
     private static setupAutoDismiss;
     /** @private */
     private static enforceMaxToasts;
+    /** @private — wire hover/focus expand once per container */
+    private static ensureStackInteraction;
     /** @private */
     private static updateStackLayout;
     /**
@@ -279,7 +284,7 @@ export declare interface StreamOptions {
     loadingMessage?: string;
 }
 
-export declare type ThemePreset = 'auto' | 'light' | 'dark' | 'glass' | 'minimal' | 'brutal';
+export declare type ThemePreset = 'auto' | 'light' | 'dark' | 'glass' | 'minimal' | 'brutal' | 'neo' | 'neon' | 'flat';
 
 export declare interface ToastAction {
     label: string;

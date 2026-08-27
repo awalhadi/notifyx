@@ -1,6 +1,6 @@
 {
   "name": "notifyx",
-  "version": "4.0.1",
+  "version": "4.1.1",
   "author": "A Awal Hadi",
   "type": "module",
   "main": "dist/notifyx.cjs",

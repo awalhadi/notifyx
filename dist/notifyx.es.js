@@ -53,7 +53,10 @@ const THEMES = {
   DARK: "dark",
   GLASS: "glass",
   MINIMAL: "minimal",
-  BRUTAL: "brutal"
+  FLAT: "flat",
+  BRUTAL: "brutal",
+  NEO: "neo",
+  NEON: "neon"
 };
 const DEFAULT_OPTIONS = {
   type: "info",
@@ -381,6 +384,9 @@ const globalQueue = new ToastQueue(100);
 const activeToastIds = /* @__PURE__ */ new Map();
 let globalDefaults = {};
 let globalTheme = "auto";
+const stackWired = /* @__PURE__ */ new WeakSet();
+const STACK_GAP = 12;
+const STACK_COLLAPSE_OFFSET = 14;
 class NotifyX {
   static {
     this.POSITIONS = POSITIONS;
@@ -686,23 +692,74 @@ class NotifyX {
     if (toasts.length >= max)
       this.removeToast(toasts[0], {});
   }
+  /** @private — wire hover/focus expand once per container */
+  static ensureStackInteraction(container, position) {
+    if (stackWired.has(container)) return;
+    stackWired.add(container);
+    const expand = () => {
+      if (container.getAttribute("data-expanded") === "true") return;
+      container.setAttribute("data-expanded", "true");
+      this.updateStackLayout(container, position);
+    };
+    const collapse = () => {
+      if (container.contains(document.activeElement)) return;
+      if (container.getAttribute("data-expanded") !== "true") return;
+      container.removeAttribute("data-expanded");
+      this.updateStackLayout(container, position);
+    };
+    container.addEventListener("pointerleave", collapse);
+    container.addEventListener("focusin", expand);
+    container.addEventListener("focusout", (e) => {
+      const next = e.relatedTarget;
+      if (next && container.contains(next)) return;
+      collapse();
+    });
+    container.addEventListener(
+      "pointerenter",
+      (e) => {
+        if (e.target.closest?.(".notifyx")) expand();
+      },
+      true
+    );
+  }
   /** @private */
   static updateStackLayout(container, position) {
     const toasts = Array.from(
       container.querySelectorAll(".notifyx:not([data-removing])")
     );
     const isTop = position.includes("top");
+    const expanded = container.getAttribute("data-expanded") === "true";
+    const reduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (expanded) {
+      let heightOffset = 0;
+      for (let i = toasts.length - 1; i >= 0; i--) {
+        const el = toasts[i];
+        const indexFromNewest = toasts.length - 1 - i;
+        const dir = isTop ? 1 : -1;
+        el.style.transform = `translateY(${dir * heightOffset}px) scale(1)`;
+        el.style.zIndex = String(100 - indexFromNewest);
+        el.style.opacity = "1";
+        el.style.pointerEvents = "auto";
+        if (reduceMotion) {
+          el.style.transition = "none";
+        }
+        heightOffset += el.offsetHeight + STACK_GAP;
+      }
+      container.style.pointerEvents = "auto";
+      return;
+    }
+    container.style.pointerEvents = "";
     toasts.forEach((el, idx) => {
       const indexFromNewest = toasts.length - 1 - idx;
-      const scale = 1 - indexFromNewest * 0.05;
-      const yOffset = (isTop ? 1 : -1) * indexFromNewest * 16;
+      const scale = 1 - indexFromNewest * 0.04;
+      const yOffset = (isTop ? 1 : -1) * indexFromNewest * STACK_COLLAPSE_OFFSET;
       el.style.transform = `translateY(${yOffset}px) scale(${scale})`;
       el.style.zIndex = String(100 - indexFromNewest);
       if (indexFromNewest > 3) {
         el.style.opacity = "0";
         el.style.pointerEvents = "none";
       } else {
-        el.style.opacity = indexFromNewest === 0 ? "1" : String(1 - indexFromNewest * 0.15);
+        el.style.opacity = indexFromNewest === 0 ? "1" : String(1 - indexFromNewest * 0.12);
         el.style.pointerEvents = indexFromNewest === 0 ? "auto" : "none";
       }
     });
@@ -728,6 +785,7 @@ class NotifyX {
       return existing;
     }
     const container = getContainer(opts.position);
+    this.ensureStackInteraction(container, opts.position);
     this.enforceMaxToasts(container, opts.maxToasts);
     const el = this.createToastElement(opts);
     container.appendChild(el);

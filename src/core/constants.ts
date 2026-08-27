@@ -23,7 +23,10 @@ export const THEMES = {
   DARK: 'dark',
   GLASS: 'glass',
   MINIMAL: 'minimal',
+  FLAT: 'flat',
   BRUTAL: 'brutal',
+  NEO: 'neo',
+  NEON: 'neon',
 } as const;
 
 export const DEFAULT_OPTIONS = {

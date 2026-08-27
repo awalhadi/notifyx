@@ -51,6 +51,9 @@ const globalQueue = new ToastQueue(100);
 const activeToastIds = new Map<string, HTMLElement>();
 let globalDefaults: Partial<ToastOptions> = {};
 let globalTheme: ThemePreset = "auto";
+const stackWired = new WeakSet<HTMLElement>();
+const STACK_GAP = 12;
+const STACK_COLLAPSE_OFFSET = 14;
 
 // ─── NotifyX ──────────────────────────────────────────────────────────────────
 
@@ -431,6 +434,45 @@ export default class NotifyX {
       this.removeToast(toasts[0], {} as NormalizedToastOptions);
   }
 
+  /** @private — wire hover/focus expand once per container */
+  private static ensureStackInteraction(
+    container: HTMLElement,
+    position: string,
+  ): void {
+    if (stackWired.has(container)) return;
+    stackWired.add(container);
+
+    const expand = () => {
+      if (container.getAttribute("data-expanded") === "true") return;
+      container.setAttribute("data-expanded", "true");
+      this.updateStackLayout(container, position);
+    };
+    const collapse = () => {
+      if (container.contains(document.activeElement)) return;
+      if (container.getAttribute("data-expanded") !== "true") return;
+      container.removeAttribute("data-expanded");
+      this.updateStackLayout(container, position);
+    };
+
+    // Container receives leave only while expanded (pointer-events toggled in layout)
+    container.addEventListener("pointerleave", collapse);
+    container.addEventListener("focusin", expand);
+    container.addEventListener("focusout", (e) => {
+      const next = (e as FocusEvent).relatedTarget as Node | null;
+      if (next && container.contains(next)) return;
+      collapse();
+    });
+
+    // Delegate enter from toasts (container is pointer-events: none when collapsed)
+    container.addEventListener(
+      "pointerenter",
+      (e) => {
+        if ((e.target as HTMLElement).closest?.(".notifyx")) expand();
+      },
+      true,
+    );
+  }
+
   /** @private */
   private static updateStackLayout(
     container: HTMLElement,
@@ -440,11 +482,36 @@ export default class NotifyX {
       container.querySelectorAll<HTMLElement>(".notifyx:not([data-removing])"),
     );
     const isTop = position.includes("top");
+    const expanded = container.getAttribute("data-expanded") === "true";
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    if (expanded) {
+      let heightOffset = 0;
+      for (let i = toasts.length - 1; i >= 0; i--) {
+        const el = toasts[i];
+        const indexFromNewest = toasts.length - 1 - i;
+        const dir = isTop ? 1 : -1;
+        el.style.transform = `translateY(${dir * heightOffset}px) scale(1)`;
+        el.style.zIndex = String(100 - indexFromNewest);
+        el.style.opacity = "1";
+        el.style.pointerEvents = "auto";
+        if (reduceMotion) {
+          el.style.transition = "none";
+        }
+        heightOffset += el.offsetHeight + STACK_GAP;
+      }
+      container.style.pointerEvents = "auto";
+      return;
+    }
+
+    container.style.pointerEvents = "";
     toasts.forEach((el, idx) => {
       const indexFromNewest = toasts.length - 1 - idx;
-      const scale = 1 - indexFromNewest * 0.05;
-      const yOffset = (isTop ? 1 : -1) * indexFromNewest * 16;
+      const scale = 1 - indexFromNewest * 0.04;
+      const yOffset =
+        (isTop ? 1 : -1) * indexFromNewest * STACK_COLLAPSE_OFFSET;
 
       el.style.transform = `translateY(${yOffset}px) scale(${scale})`;
       el.style.zIndex = String(100 - indexFromNewest);
@@ -454,7 +521,7 @@ export default class NotifyX {
         el.style.pointerEvents = "none";
       } else {
         el.style.opacity =
-          indexFromNewest === 0 ? "1" : String(1 - indexFromNewest * 0.15);
+          indexFromNewest === 0 ? "1" : String(1 - indexFromNewest * 0.12);
         el.style.pointerEvents = indexFromNewest === 0 ? "auto" : "none";
       }
     });
@@ -485,6 +552,7 @@ export default class NotifyX {
     }
 
     const container = getContainer(opts.position);
+    this.ensureStackInteraction(container, opts.position);
     this.enforceMaxToasts(container, opts.maxToasts);
 
     const el = this.createToastElement(opts);
